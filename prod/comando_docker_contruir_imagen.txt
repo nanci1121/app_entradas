@@ -1,0 +1,2 @@
+docker build -t srv_alpine:prod -f prod/Dockerfile app
+docker compose -f prod/docker-compose.yml --env-file .env up -d

@@ -30,7 +30,7 @@ Aplicación Node.js dockerizada para gestión de entradas con autenticación JWT
 
 ```
 ┌─────────────┐
-│   App       │  Puerto 7202 (Prod) / 7002 (Dev)
+│   App       │  Puerto 7202 (Prod)
 │  Node.js    │  - API REST
 │  Socket.IO  │  - WebSockets
 └──────┬──────┘
@@ -71,9 +71,7 @@ Aplicación Node.js dockerizada para gestión de entradas con autenticación JWT
 
 ### Desarrollo Local
 
-- Docker Desktop o Docker Engine
-- Node.js 20+ (opcional, para desarrollo sin Docker)
-- Puerto `7002` disponible
+Este proyecto está orientado a producción. El antiguo entorno de desarrollo Docker ha sido retirado para simplificar el despliegue.
 
 ---
 
@@ -163,20 +161,13 @@ POSTGRES_PASSWORD=contraseña_segura_db
 
 ### Desarrollo
 
-1. **Levantar con hot-reload**:
-   ```bash
-   docker compose -f dev/docker-compose.dev.yml --env-file .env up -d
-   ```
+El flujo de desarrollo con Docker fue removido. Puedes ejecutar la app localmente con Node si lo necesitas:
 
-2. **Ver logs en tiempo real**:
-   ```bash
-   docker compose -f dev/docker-compose.dev.yml logs -f app
-   ```
-
-3. **Reconstruir tras cambios en dependencias**:
-   ```bash
-   docker compose -f dev/docker-compose.dev.yml up -d --build
-   ```
+```bash
+cd app
+npm install
+npm run start
+```
 
 ### Comandos Útiles
 
@@ -319,19 +310,7 @@ sudo ufw enable
 
 PgAdmin **NO** está incluido en el stack Docker. Para administrar la base de datos desde tu PC Windows:
 
-#### Opción 1: Conexión Directa (Solo Desarrollo)
-
-Si Postgres está expuesto (entorno dev, puerto 7000):
-
-1. Abrir PgAdmin en Windows
-2. Crear nueva conexión:
-   - **Host**: IP del servidor (ej: 192.168.1.100)
-   - **Port**: 7000 (dev) 
-   - **Database**: firstapi (o tu `PGDATABASE`)
-   - **Username**: vmv (o tu `PGUSER`)
-   - **Password**: [tu PGPASSWORD]
-
-⚠️ **En producción**, Postgres NO está expuesto públicamente por seguridad.
+⚠️ Postgres NO está expuesto públicamente en producción. Para acceder, usa túnel SSH o exposición temporal en `localhost`.
 
 #### Opción 2: Túnel SSH (Producción)
 

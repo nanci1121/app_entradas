@@ -1,0 +1,48 @@
+services:  
+  db:
+    image: postgres:15.2-alpine
+    restart: always
+    ports: # Mapeo de puertos para la base de datos
+      - "7000:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U vmv"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - local_pgdata:/var/lib/postgresql/data
+
+
+  app:
+    image: srv_alpine:v1
+    restart: unless-stopped
+    ports:
+      - "7002:3000"
+    environment:
+      - PORT=3000
+      - PGHOST=db
+      - PGUSER=${POSTGRES_USER}
+      - PGDATABASE=${PGDATABASE}
+      - PGPASSWORD=${POSTGRES_PASSWORD}
+      - PGPORT=5432
+      - JWT_KEY=${JWT_KEY}
+    # volumes:
+    #   - .:/app   # bind mount: si tu carpeta local está vacía, se sobreescribe la imagen
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+      
+
+volumes:
+  local_pgdata:
+
+networks:
+  app-network:
+    driver: bridge

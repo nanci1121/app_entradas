@@ -1,0 +1,63 @@
+services:
+  db:
+    image: postgres:15.2-alpine
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${PGDATABASE}
+    networks:
+      - app-network
+    volumes:
+      - local_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U vmv"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  app:
+    image: srv_alpine:prod
+    restart: unless-stopped
+    ports:
+      - "7202:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - PGHOST=db
+      - PGUSER=${POSTGRES_USER}
+      - PGDATABASE=${PGDATABASE}
+      - PGPASSWORD=${POSTGRES_PASSWORD}
+      - PGPORT=5432
+      - JWT_KEY=${JWT_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+
+
+
+volumes:
+  local_pgdata:
+
+networks:
+  app-network:
+    driver: bridge
