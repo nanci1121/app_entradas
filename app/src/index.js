@@ -56,3 +56,32 @@ app.get('/api/ping', (req, res) => {
 server.listen(port, () => {
   console.log(`App Entradas listening on port ${port}`)
 })
+
+// Apagado elegante (graceful shutdown)
+const ioInstance = module.exports.io;
+const shutdown = (signal) => {
+  console.log(`Recibido ${signal}. Cerrando servidor con gracia...`);
+  // Cerrar nuevas conexiones
+  server.close((err) => {
+    if (err) {
+      console.error('Error cerrando servidor HTTP:', err);
+    }
+    // Cerrar Socket.IO
+    try {
+      if (ioInstance && typeof ioInstance.close === 'function') {
+        ioInstance.close();
+      }
+    } catch (e) {
+      console.error('Error cerrando Socket.IO:', e);
+    }
+    process.exit(0);
+  });
+  // Fallback por si close se atasca
+  setTimeout(() => {
+    console.warn('Forzando salida tras timeout de cierre.');
+    process.exit(1);
+  }, 10000).unref();
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
