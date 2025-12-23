@@ -2,9 +2,6 @@ services:
   db:
     image: postgres:15.2-alpine
     restart: always
-    # Puerto expuesto solo en localhost para importación de datos
-    ports:
-      - "127.0.0.1:5432:5432"
     env_file:
       - .env
     environment:
@@ -60,6 +57,7 @@ services:
 
 volumes:
   local_pgdata:
+  pgadmin-data:
 
 networks:
   app-network:

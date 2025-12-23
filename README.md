@@ -306,48 +306,39 @@ sudo ufw enable
 
 ## 🗄️ Administración de Base de Datos
 
-### Conexión desde PgAdmin (Windows)
+### PgAdmin (Interfaz Web)
 
-PgAdmin **NO** está incluido en el stack Docker. Para administrar la base de datos desde tu PC Windows:
+PgAdmin está incluido en el stack y accesible **solo desde el servidor** en `http://localhost:7201`.
 
-#### Opción 1: Túnel SSH (Recomendado)
-
-Para acceder de forma segura desde fuera del servidor:
+**Acceder desde tu PC Windows:**
 
 ```bash
-# En tu PC Windows (PowerShell o Git Bash)
-ssh -L 5433:localhost:5432 usuario@servidor-produccion
+# Crear túnel SSH para PgAdmin
+ssh -L 7201:localhost:7201 usuario@servidor-produccion
 
-# Mantener esta terminal abierta
+# Abrir en navegador: http://localhost:7201
 ```
 
-Luego en PgAdmin:
-- **Host**: localhost
-- **Port**: 5433
-- **Database**: firstapi
-- **Username/Password**: [tus credenciales]
+**Credenciales:** Las definidas en `.env` (`PGADMIN_DEFAULT_EMAIL` y `PGADMIN_DEFAULT_PASSWORD`).
 
-#### Opción 2: Conexión Directa (Desde el mismo servidor)
+**Conectar PgAdmin a la base de datos:**
+1. En PgAdmin, clic derecho en "Servers" → "Register" → "Server"
+2. Pestaña "General": Nombre = "App Entradas DB"
+3. Pestaña "Connection":
+   - **Host**: `db` (nombre del servicio en Docker)
+   - **Port**: `5432`
+   - **Database**: `firstapi` (o tu `PGDATABASE`)
+   - **Username**: tu `PGUSER`
+   - **Password**: tu `PGPASSWORD`
+4. Guardar
 
-PostgreSQL está expuesto en `127.0.0.1:5432` (solo accesible desde localhost del servidor). Puedes conectarte directamente si estás en el servidor:
-
-```bash
-# Desde el servidor de producción
-psql -h localhost -p 5432 -U vmv -d firstapi
-```
-
-O desde tu PC si configuras túnel SSH (ver Opción 1).
-
-⚠️ Postgres NO está expuesto a Internet públicamente por seguridad.
+⚠️ **Seguridad:** Postgres y PgAdmin NO están expuestos a Internet. PgAdmin solo en `127.0.0.1:7201`.
 
 ### Comandos de Administración
 
 ```bash
 # Entrar al CLI de PostgreSQL
 docker compose -f prod/docker-compose.yml exec db psql -U vmv -d firstapi
-
-# O desde el servidor directamente
-psql -h localhost -p 5432 -U vmv -d firstapi
 
 # Dentro de psql:
 \dt              # Listar tablas
@@ -360,8 +351,11 @@ docker compose -f prod/docker-compose.yml exec -T db pg_dump -U vmv firstapi > b
 # Restaurar backup
 cat backup_20251222.sql | docker compose -f prod/docker-compose.yml exec -T db psql -U vmv -d firstapi
 
-# Importar desde otra base de datos (usando túnel SSH o desde el servidor)
-pg_dump -h <servidor_origen> -U <usuario> -d <db_origen> | psql -h localhost -p 5432 -U vmv -d firstapi
+# Importar desde otra base de datos (desde el servidor)
+# Primero hacer backup en origen, transferir al servidor, luego:
+cat backup_origen.sql | docker compose -f prod/docker-compose.yml exec -T db psql -U vmv -d firstapi
+
+# O usar PgAdmin para importar/exportar con interfaz gráfica
 
 # Ver conexiones activas
 docker compose -f prod/docker-compose.yml exec db psql -U vmv -d firstapi -c "SELECT * FROM pg_stat_activity;"
