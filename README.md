@@ -310,11 +310,9 @@ sudo ufw enable
 
 PgAdmin **NO** está incluido en el stack Docker. Para administrar la base de datos desde tu PC Windows:
 
-⚠️ Postgres NO está expuesto públicamente en producción. Para acceder, usa túnel SSH o exposición temporal en `localhost`.
+#### Opción 1: Túnel SSH (Recomendado)
 
-#### Opción 2: Túnel SSH (Producción)
-
-Para acceder en producción de forma segura:
+Para acceder de forma segura desde fuera del servidor:
 
 ```bash
 # En tu PC Windows (PowerShell o Git Bash)
@@ -329,23 +327,27 @@ Luego en PgAdmin:
 - **Database**: firstapi
 - **Username/Password**: [tus credenciales]
 
-#### Opción 3: Exponer Temporalmente
+#### Opción 2: Conexión Directa (Desde el mismo servidor)
+
+PostgreSQL está expuesto en `127.0.0.1:5432` (solo accesible desde localhost del servidor). Puedes conectarte directamente si estás en el servidor:
 
 ```bash
-# Modificar prod/docker-compose.yml temporalmente
-# Agregar en servicio db:
-    ports:
-      - "127.0.0.1:5432:5432"  # Solo accesible desde localhost
-
-# Reiniciar
-docker compose -f prod/docker-compose.yml up -d db
+# Desde el servidor de producción
+psql -h localhost -p 5432 -U vmv -d firstapi
 ```
+
+O desde tu PC si configuras túnel SSH (ver Opción 1).
+
+⚠️ Postgres NO está expuesto a Internet públicamente por seguridad.
 
 ### Comandos de Administración
 
 ```bash
 # Entrar al CLI de PostgreSQL
 docker compose -f prod/docker-compose.yml exec db psql -U vmv -d firstapi
+
+# O desde el servidor directamente
+psql -h localhost -p 5432 -U vmv -d firstapi
 
 # Dentro de psql:
 \dt              # Listar tablas
@@ -357,6 +359,9 @@ docker compose -f prod/docker-compose.yml exec -T db pg_dump -U vmv firstapi > b
 
 # Restaurar backup
 cat backup_20251222.sql | docker compose -f prod/docker-compose.yml exec -T db psql -U vmv -d firstapi
+
+# Importar desde otra base de datos (usando túnel SSH o desde el servidor)
+pg_dump -h <servidor_origen> -U <usuario> -d <db_origen> | psql -h localhost -p 5432 -U vmv -d firstapi
 
 # Ver conexiones activas
 docker compose -f prod/docker-compose.yml exec db psql -U vmv -d firstapi -c "SELECT * FROM pg_stat_activity;"
