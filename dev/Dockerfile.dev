@@ -1,0 +1,5 @@
+FROM scratch
+############################################
+# DEPRECATED: Entorno de desarrollo eliminado
+# Usa prod/Dockerfile
+############################################

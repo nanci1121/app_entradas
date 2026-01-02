@@ -24,7 +24,8 @@ const generarJWT = (id) => {
 
 const comprobarJWT = (token) => {
     try {
-        const { id } = jwt.verify(token, process.env.JWT_KEY);
+        const {valido, id } = jwt.verify(token, process.env.JWT_KEY); 
+        console.log(`id del usuario es : ${id}  `);       
         return [true, id];
     } catch (error) {
         return [false, null];

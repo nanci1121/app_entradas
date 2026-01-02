@@ -1,0 +1,1416 @@
+--- schema_estructura_10.192.93.0.sql	2025-12-23 07:33:01.314591659 +0100
++++ ./schema_estructura_10.192.92.12.sql	2025-12-23 10:29:20.296568222 +0100
+@@ -1,771 +1,642 @@
+---
+--- PostgreSQL database dump
+---
+-
+--- Dumped from database version 15.2
+--- Dumped by pg_dump version 15.2
+-
+-SET statement_timeout = 0;
+-SET lock_timeout = 0;
+-SET idle_in_transaction_session_timeout = 0;
+-SET client_encoding = 'UTF8';
+-SET standard_conforming_strings = on;
+-SELECT pg_catalog.set_config('search_path', '', false);
+-SET check_function_bodies = false;
+-SET xmloption = content;
+-SET client_min_messages = warning;
+-SET row_security = off;
+-
+---
+--- Name: f_data_creation(); Type: FUNCTION; Schema: public; Owner: vmv
+---
+-
+-CREATE FUNCTION public.f_data_creation() RETURNS trigger
+-    LANGUAGE plpgsql
+-    AS $$
+-begin
+-new.date_creation = now();
+-return new;
+-end
+-$$;
+-
+-
+-ALTER FUNCTION public.f_data_creation() OWNER TO vmv;
+-
+---
+--- Name: f_data_modification_empresa_e(); Type: FUNCTION; Schema: public; Owner: vmv
+---
+-
+-CREATE FUNCTION public.f_data_modification_empresa_e() RETURNS trigger
+-    LANGUAGE plpgsql
+-    AS $$
+-begin
+-new.date_modification=now();
+-insert into log_empresas_exteriores (
+-	id_empresa,	
+-	nombre_persona,
+-	empresa_exterior,
+-	peticionario,
+-	nota,
+-	recepcion,
+-	fecha_salida,
+-	date_modification,
+-	usuario,
+-	fecha_entrada,
+-	date_creation
+-) values(
+-	old.id,
+-	old.nombre_persona,
+-	old.empresa_exterior,
+-	old.peticionario,
+-	old.nota,
+-	old.recepcion,
+-	old.fecha_salida,
+-	old.date_modification,
+-	old.usuario,
+-	old.fecha_entrada,
+-	new.date_creation
+-	);
+-return new;
+-end
+-$$;
+-
+-
+-ALTER FUNCTION public.f_data_modification_empresa_e() OWNER TO vmv;
+-
+---
+--- Name: f_data_modification_entrada_v(); Type: FUNCTION; Schema: public; Owner: vmv
+---
+-
+-CREATE FUNCTION public.f_data_modification_entrada_v() RETURNS trigger
+-    LANGUAGE plpgsql
+-    AS $$begin
+-new.date_modification=now();
+-insert into log_entradas_vehiculos (
+-	empresa,
+-	nombre_conductor,
+-	matricula,
+-	fecha_entrada,
+-	fecha_salida,
+-	date_modification,
+-	usuario,
+-	clase_carga,
+-	recepcion,
+-	id_empresa,
+-	date_creation
+-) 
+-values(
+-	old.empresa,
+-	old.nombre_conductor,
+-	old.matricula,
+-	old.fecha_entrada,
+-	old.fecha_salida,
+-	new.date_modification,
+-	old.usuario,
+-	old.clase_carga,
+-	old.recepcion,
+-	old.id,
+-	old.date_creation	
+-	);
+-return new;
+-end$$;
+-
+-
+-ALTER FUNCTION public.f_data_modification_entrada_v() OWNER TO vmv;
+-
+---
+--- Name: f_data_modification_user(); Type: FUNCTION; Schema: public; Owner: vmv
+---
+-
+-CREATE FUNCTION public.f_data_modification_user() RETURNS trigger
+-    LANGUAGE plpgsql
+-    AS $$begin
+-new.date_modification=now();
+-insert into log_users(
+-	id_user,
+-	name,
+-	email,
+-	password,
+-	online,
+-	type,
+-	date_creation,
+-	date_modification	
+-) 
+-values(
+-	old.id,
+-	old.name,
+-	old.email,
+-	old.password,
+-	old.online,
+-	old.type,
+-	old.date_creation,
+-	new.date_modification	
+-	);
+-return new;
+-end$$;
+-
+-
+-ALTER FUNCTION public.f_data_modification_user() OWNER TO vmv;
+-
+---
+--- Name: f_date_erasure_empresas_e(); Type: FUNCTION; Schema: public; Owner: vmv
+---
+-
+-CREATE FUNCTION public.f_date_erasure_empresas_e() RETURNS trigger
+-    LANGUAGE plpgsql
+-    AS $$begin
+-insert into log_empresas_exteriores 
+-	values (	
+-	old.nombre_persona,
+-	old.empresa_exterior,	
+-	old.peticionario,
+-	old.nota,
+-	old.recepcion,	
+-	old.fecha_salida,
+-	old.date_modification,
+-	old.telefono_persona,
+-	old.usuario,
+-	old.fecha_entrada,
+-	old.id,	
+-	now(),
+-	old.date_creation
+-	);
+-
+-return old;
+-end$$;
+-
+-
+-ALTER FUNCTION public.f_date_erasure_empresas_e() OWNER TO vmv;
+-
+---
+--- Name: f_date_erasure_entradas_v(); Type: FUNCTION; Schema: public; Owner: vmv
+---
+-
+-CREATE FUNCTION public.f_date_erasure_entradas_v() RETURNS trigger
+-    LANGUAGE plpgsql
+-    AS $$begin
+-insert into log_entradas_vehiculos 
+-	values (		
+-	old.empresa,
+-	old.nombre_conductor,	
+-	old.matricula,
+-	old.fecha_entrada,
+-	old.fecha_salida,	
+-	old.date_modification,
+-	old.usuario,
+-	old.clase_carga,
+-	old.recepcion,
+-	old.id,	
+-	now(),
+-	old.date_creation
+-	);
+-
+-return old;
+-end$$;
+-
+-
+-ALTER FUNCTION public.f_date_erasure_entradas_v() OWNER TO vmv;
+-
+---
+--- Name: f_date_erasure_users(); Type: FUNCTION; Schema: public; Owner: vmv
+---
+-
+-CREATE FUNCTION public.f_date_erasure_users() RETURNS trigger
+-    LANGUAGE plpgsql
+-    AS $$begin
+-insert into log_users
+-	values (		
+-	old.name,
+-	old.email,
+-	old.password,
+-	old.online,	
+-	old.type,
+-	old.date_creation,
+-	new.date_modification,
+-	now(),
+-	old.id
+-	);
+-
+-return old;
+-end$$;
+-
+-
+-ALTER FUNCTION public.f_date_erasure_users() OWNER TO vmv;
+-
+---
+--- Name: update_modification_column(); Type: FUNCTION; Schema: public; Owner: vmv
+---
+-
+-CREATE FUNCTION public.update_modification_column() RETURNS trigger
+-    LANGUAGE plpgsql
+-    AS $$
+-BEGIN
+-    NEW.date_modification = now();
+-    RETURN NEW;
+-END;
+-$$;
+-
+-
+-ALTER FUNCTION public.update_modification_column() OWNER TO vmv;
+-
+-SET default_tablespace = '';
+-
+-SET default_table_access_method = heap;
+-
+---
+--- Name: empresas_exteriores; Type: TABLE; Schema: public; Owner: vmv
+---
+-
+-CREATE TABLE public.empresas_exteriores (
+-    nombre_persona text NOT NULL,
+-    empresa_exterior text NOT NULL,
+-    peticionario text,
+-    telefono_persona text,
+-    date_creation timestamp with time zone,
+-    fecha_entrada timestamp with time zone,
+-    firma text,
+-    id integer NOT NULL,
+-    nota character varying(100),
+-    usuario integer,
+-    recepcion boolean DEFAULT false,
+-    fecha_salida timestamp with time zone,
+-    date_modification timestamp with time zone
+-);
+-
+-
+-ALTER TABLE public.empresas_exteriores OWNER TO vmv;
+-
+---
+--- Name: empresas_exteriores_id_seq; Type: SEQUENCE; Schema: public; Owner: vmv
+---
+-
+-CREATE SEQUENCE public.empresas_exteriores_id_seq
+-    AS integer
+-    START WITH 1
+-    INCREMENT BY 1
+-    NO MINVALUE
+-    NO MAXVALUE
+-    CACHE 1;
+-
+-
+-ALTER TABLE public.empresas_exteriores_id_seq OWNER TO vmv;
+-
+---
+--- Name: empresas_exteriores_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: vmv
+---
+-
+-ALTER SEQUENCE public.empresas_exteriores_id_seq OWNED BY public.empresas_exteriores.id;
+-
+-
+---
+--- Name: entradas_vehiculos; Type: TABLE; Schema: public; Owner: vmv
+---
+-
+-CREATE TABLE public.entradas_vehiculos (
+-    id integer NOT NULL,
+-    firma text DEFAULT 'firma'::text NOT NULL,
+-    recepcion boolean DEFAULT false,
+-    vigilancia boolean DEFAULT false,
+-    empresa character varying(30) DEFAULT 'empresa'::text NOT NULL,
+-    nombre_conductor character varying(50) DEFAULT 'nombre_conductor'::text,
+-    matricula character varying(15) DEFAULT 'matricula'::text NOT NULL,
+-    date_creation timestamp with time zone,
+-    fecha_entrada timestamp with time zone,
+-    fecha_salida timestamp with time zone,
+-    date_modification timestamp with time zone,
+-    clase_carga character varying(100),
+-    usuario integer
+-);
+-
+-
+-ALTER TABLE public.entradas_vehiculos OWNER TO vmv;
+-
+---
+--- Name: entrada_vehiculo_id_seq; Type: SEQUENCE; Schema: public; Owner: vmv
+---
+-
+-CREATE SEQUENCE public.entrada_vehiculo_id_seq
+-    AS integer
+-    START WITH 1
+-    INCREMENT BY 1
+-    NO MINVALUE
+-    NO MAXVALUE
+-    CACHE 1;
+-
+-
+-ALTER TABLE public.entrada_vehiculo_id_seq OWNER TO vmv;
+-
+---
+--- Name: entrada_vehiculo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: vmv
+---
+-
+-ALTER SEQUENCE public.entrada_vehiculo_id_seq OWNED BY public.entradas_vehiculos.id;
+-
+-
+---
+--- Name: log_empresas_exteriores; Type: TABLE; Schema: public; Owner: vmv
+---
+-
+-CREATE TABLE public.log_empresas_exteriores (
+-    nombre_persona text,
+-    empresa_exterior text,
+-    peticionario text,
+-    nota character varying(100),
+-    recepcion boolean,
+-    fecha_salida timestamp with time zone,
+-    date_modification timestamp with time zone,
+-    telefono_persona text,
+-    usuario integer,
+-    fecha_entrada text,
+-    id_empresa integer,
+-    date_erasure timestamp with time zone,
+-    date_creation timestamp with time zone
+-);
+-
+-
+-ALTER TABLE public.log_empresas_exteriores OWNER TO vmv;
+-
+---
+--- Name: log_entradas_vehiculos; Type: TABLE; Schema: public; Owner: vmv
+---
+-
+-CREATE TABLE public.log_entradas_vehiculos (
+-    empresa character varying(30),
+-    nombre_conductor character varying(50),
+-    matricula character varying(15),
+-    fecha_entrada timestamp with time zone,
+-    fecha_salida timestamp with time zone,
+-    date_modification timestamp with time zone,
+-    usuario integer,
+-    clase_carga character varying(100),
+-    recepcion boolean,
+-    id_empresa integer,
+-    date_erasure timestamp with time zone,
+-    date_creation timestamp with time zone
+-);
+-
+-
+-ALTER TABLE public.log_entradas_vehiculos OWNER TO vmv;
+-
+---
+--- Name: log_users; Type: TABLE; Schema: public; Owner: vmv
+---
+-
+-CREATE TABLE public.log_users (
+-    name character varying(100),
+-    email character varying(100),
+-    password character varying(100),
+-    online boolean,
+-    type "char",
+-    date_creation timestamp with time zone,
+-    date_modification timestamp with time zone,
+-    date_erasure timestamp with time zone,
+-    id_user integer
+-);
+-
+-
+-ALTER TABLE public.log_users OWNER TO vmv;
+-
+---
+--- Name: salidas_empleados_id_seq; Type: SEQUENCE; Schema: public; Owner: vmv
+---
+-
+-CREATE SEQUENCE public.salidas_empleados_id_seq
+-    START WITH 1
+-    INCREMENT BY 1
+-    NO MINVALUE
+-    NO MAXVALUE
+-    CACHE 1;
+-
+-
+-ALTER TABLE public.salidas_empleados_id_seq OWNER TO vmv;
+-
+---
+--- Name: salidas_empleados; Type: TABLE; Schema: public; Owner: vmv
+---
+-
+-CREATE TABLE public.salidas_empleados (
+-    id integer DEFAULT nextval('public.salidas_empleados_id_seq'::regclass) NOT NULL,
+-    codigo_empleado character varying(4) NOT NULL,
+-    nombre_persona character varying(50) NOT NULL,
+-    fecha_salida timestamp with time zone,
+-    fecha_entrada timestamp with time zone,
+-    date_creation timestamp with time zone,
+-    date_modification timestamp with time zone,
+-    usuario character varying,
+-    motivo text
+-);
+-
+-
+-ALTER TABLE public.salidas_empleados OWNER TO vmv;
+-
+---
+--- Name: salidas_tornos; Type: TABLE; Schema: public; Owner: vmv
+---
+-
+-CREATE TABLE public.salidas_tornos (
+-    id integer NOT NULL,
+-    codigo_empleado character varying(50) NOT NULL,
+-    fecha_entrada timestamp with time zone,
+-    fecha_salida timestamp with time zone,
+-    usuario integer,
+-    date_creation timestamp with time zone DEFAULT now() NOT NULL,
+-    date_modification timestamp with time zone,
+-    CONSTRAINT chk_fecha_not_null CHECK (((fecha_entrada IS NOT NULL) OR (fecha_salida IS NOT NULL)))
+-);
+-
+-
+-ALTER TABLE public.salidas_tornos OWNER TO vmv;
+-
+---
+--- Name: TABLE salidas_tornos; Type: COMMENT; Schema: public; Owner: vmv
+---
+-
+-COMMENT ON TABLE public.salidas_tornos IS 'Tabla para registrar las salidas y entradas del torno.';
+-
+-
+---
+--- Name: COLUMN salidas_tornos.id; Type: COMMENT; Schema: public; Owner: vmv
+---
+-
+-COMMENT ON COLUMN public.salidas_tornos.id IS 'Identificador único autoincremental para cada registro.';
+-
+-
+---
+--- Name: COLUMN salidas_tornos.codigo_empleado; Type: COMMENT; Schema: public; Owner: vmv
+---
+-
+-COMMENT ON COLUMN public.salidas_tornos.codigo_empleado IS 'Código del empleado que realiza la salida/entrada. Referencia a la tabla users.';
+-
+-
+---
+--- Name: COLUMN salidas_tornos.fecha_entrada; Type: COMMENT; Schema: public; Owner: vmv
+---
+-
+-COMMENT ON COLUMN public.salidas_tornos.fecha_entrada IS 'Fecha y hora en la que la persona regresa.';
+-
+-
+---
+--- Name: COLUMN salidas_tornos.fecha_salida; Type: COMMENT; Schema: public; Owner: vmv
+---
+-
+-COMMENT ON COLUMN public.salidas_tornos.fecha_salida IS 'Fecha y hora en la que la persona sale.';
+-
+-
+---
+--- Name: COLUMN salidas_tornos.usuario; Type: COMMENT; Schema: public; Owner: vmv
+---
+-
+-COMMENT ON COLUMN public.salidas_tornos.usuario IS 'ID del usuario del sistema que registra la operación, con referencia a la tabla users.';
+-
+-
+---
+--- Name: COLUMN salidas_tornos.date_creation; Type: COMMENT; Schema: public; Owner: vmv
+---
+-
+-COMMENT ON COLUMN public.salidas_tornos.date_creation IS 'Fecha y hora de la creación del registro.';
+-
+-
+---
+--- Name: COLUMN salidas_tornos.date_modification; Type: COMMENT; Schema: public; Owner: vmv
+---
+-
+-COMMENT ON COLUMN public.salidas_tornos.date_modification IS 'Fecha y hora de la última modificación del registro.';
+-
+-
+---
+--- Name: CONSTRAINT chk_fecha_not_null ON salidas_tornos; Type: COMMENT; Schema: public; Owner: vmv
+---
+-
+-COMMENT ON CONSTRAINT chk_fecha_not_null ON public.salidas_tornos IS 'Asegura que al menos una de las fechas (entrada o salida) no sea nula.';
+-
+-
+---
+--- Name: salidas_tornos_id_seq; Type: SEQUENCE; Schema: public; Owner: vmv
+---
+-
+-CREATE SEQUENCE public.salidas_tornos_id_seq
+-    AS integer
+-    START WITH 1
+-    INCREMENT BY 1
+-    NO MINVALUE
+-    NO MAXVALUE
+-    CACHE 1;
+-
+-
+-ALTER TABLE public.salidas_tornos_id_seq OWNER TO vmv;
+-
+---
+--- Name: salidas_tornos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: vmv
+---
+-
+-ALTER SEQUENCE public.salidas_tornos_id_seq OWNED BY public.salidas_tornos.id;
+-
+-
+---
+--- Name: users; Type: TABLE; Schema: public; Owner: vmv
+---
+-
+-CREATE TABLE public.users (
+-    id integer NOT NULL,
+-    name character varying(100),
+-    email character varying(100),
+-    password character varying(100),
+-    online boolean DEFAULT false,
+-    type "char",
+-    date_creation timestamp with time zone,
+-    date_modification timestamp with time zone,
+-    codigo_empleado character varying(5)
+-);
+-
+-
+-ALTER TABLE public.users OWNER TO vmv;
+-
+---
+--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: vmv
+---
+-
+-CREATE SEQUENCE public.users_id_seq
+-    AS integer
+-    START WITH 1
+-    INCREMENT BY 1
+-    NO MINVALUE
+-    NO MAXVALUE
+-    CACHE 1;
+-
+-
+-ALTER TABLE public.users_id_seq OWNER TO vmv;
+-
+---
+--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: vmv
+---
+-
+-ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+-
+-
+---
+--- Name: v_firma_no_entradas; Type: VIEW; Schema: public; Owner: vmv
+---
+-
+-CREATE VIEW public.v_firma_no_entradas AS
+- SELECT entradas_vehiculos.id,
+-    entradas_vehiculos.nombre_conductor,
+-    entradas_vehiculos.vigilancia,
+-    entradas_vehiculos.recepcion,
+-    entradas_vehiculos.empresa,
+-    entradas_vehiculos.matricula,
+-    entradas_vehiculos.fecha_entrada,
+-    entradas_vehiculos.fecha_salida,
+-    entradas_vehiculos.date_creation AS fecha_creacion,
+-    entradas_vehiculos.date_modification AS fecha_modificacion
+-   FROM public.entradas_vehiculos;
+-
+-
+-ALTER TABLE public.v_firma_no_entradas OWNER TO vmv;
+-
+---
+--- Name: empresas_exteriores id; Type: DEFAULT; Schema: public; Owner: vmv
+---
+-
+-ALTER TABLE ONLY public.empresas_exteriores ALTER COLUMN id SET DEFAULT nextval('public.empresas_exteriores_id_seq'::regclass);
+-
+-
+---
+--- Name: entradas_vehiculos id; Type: DEFAULT; Schema: public; Owner: vmv
+---
+-
+-ALTER TABLE ONLY public.entradas_vehiculos ALTER COLUMN id SET DEFAULT nextval('public.entrada_vehiculo_id_seq'::regclass);
+-
+-
+---
+--- Name: salidas_tornos id; Type: DEFAULT; Schema: public; Owner: vmv
+---
+-
+-ALTER TABLE ONLY public.salidas_tornos ALTER COLUMN id SET DEFAULT nextval('public.salidas_tornos_id_seq'::regclass);
+-
+-
+---
+--- Name: users id; Type: DEFAULT; Schema: public; Owner: vmv
+---
+-
+-ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+-
+-
+---
+--- Name: empresas_exteriores empresas_exteriores_pkey; Type: CONSTRAINT; Schema: public; Owner: vmv
+---
+-
+-ALTER TABLE ONLY public.empresas_exteriores
+-    ADD CONSTRAINT empresas_exteriores_pkey PRIMARY KEY (id);
+-
+-
+---
+--- Name: entradas_vehiculos entrada_vehiculo_pkey; Type: CONSTRAINT; Schema: public; Owner: vmv
+---
+-
+-ALTER TABLE ONLY public.entradas_vehiculos
+-    ADD CONSTRAINT entrada_vehiculo_pkey PRIMARY KEY (id);
+-
+-
+---
+--- Name: salidas_empleados salidas_empleados_pkey; Type: CONSTRAINT; Schema: public; Owner: vmv
+---
+-
+-ALTER TABLE ONLY public.salidas_empleados
+-    ADD CONSTRAINT salidas_empleados_pkey PRIMARY KEY (id);
+-
+-
+---
+--- Name: salidas_tornos salidas_tornos_pkey; Type: CONSTRAINT; Schema: public; Owner: vmv
+---
+-
+-ALTER TABLE ONLY public.salidas_tornos
+-    ADD CONSTRAINT salidas_tornos_pkey PRIMARY KEY (id);
+-
+-
+---
+--- Name: users users_codigo_empleado_key; Type: CONSTRAINT; Schema: public; Owner: vmv
+---
+-
+-ALTER TABLE ONLY public.users
+-    ADD CONSTRAINT users_codigo_empleado_key UNIQUE (codigo_empleado);
+-
+-
+---
+--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: vmv
+---
+-
+-ALTER TABLE ONLY public.users
+-    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+-
+-
+---
+--- Name: empresas_exteriores tr_creation_empresas_e; Type: TRIGGER; Schema: public; Owner: vmv
+---
+-
+-CREATE TRIGGER tr_creation_empresas_e BEFORE INSERT ON public.empresas_exteriores FOR EACH ROW EXECUTE FUNCTION public.f_data_creation();
+-
+-
+---
+--- Name: entradas_vehiculos tr_creation_entradas_v; Type: TRIGGER; Schema: public; Owner: vmv
+---
+-
+-CREATE TRIGGER tr_creation_entradas_v BEFORE INSERT ON public.entradas_vehiculos FOR EACH ROW EXECUTE FUNCTION public.f_data_creation();
+-
+-
+---
+--- Name: users tr_date_creation_users; Type: TRIGGER; Schema: public; Owner: vmv
+---
+-
+-CREATE TRIGGER tr_date_creation_users BEFORE INSERT ON public.users FOR EACH ROW EXECUTE FUNCTION public.f_data_creation();
+-
+-
+---
+--- Name: users tr_date_modification_user; Type: TRIGGER; Schema: public; Owner: vmv
+---
+-
+-CREATE TRIGGER tr_date_modification_user BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.f_data_modification_user();
+-
+-
+---
+--- Name: empresas_exteriores tr_erase_empresa_e; Type: TRIGGER; Schema: public; Owner: vmv
+---
+-
+-CREATE TRIGGER tr_erase_empresa_e AFTER DELETE ON public.empresas_exteriores FOR EACH ROW EXECUTE FUNCTION public.f_date_erasure_empresas_e();
+-
+-
+---
+--- Name: entradas_vehiculos tr_erase_entradas_v; Type: TRIGGER; Schema: public; Owner: vmv
+---
+-
+-CREATE TRIGGER tr_erase_entradas_v BEFORE DELETE ON public.entradas_vehiculos FOR EACH ROW EXECUTE FUNCTION public.f_date_erasure_entradas_v();
+-
+-
+---
+--- Name: users tr_erase_user; Type: TRIGGER; Schema: public; Owner: vmv
+---
+-
+-CREATE TRIGGER tr_erase_user BEFORE DELETE ON public.users FOR EACH ROW EXECUTE FUNCTION public.f_date_erasure_users();
+-
+-
+---
+--- Name: empresas_exteriores tr_modification_empresa_e; Type: TRIGGER; Schema: public; Owner: vmv
+---
+-
+-CREATE TRIGGER tr_modification_empresa_e BEFORE UPDATE ON public.empresas_exteriores FOR EACH ROW EXECUTE FUNCTION public.f_data_modification_empresa_e();
+-
+-
+---
+--- Name: entradas_vehiculos tr_modification_entradas_v; Type: TRIGGER; Schema: public; Owner: vmv
+---
+-
+-CREATE TRIGGER tr_modification_entradas_v BEFORE UPDATE ON public.entradas_vehiculos FOR EACH ROW EXECUTE FUNCTION public.f_data_modification_entrada_v();
+-
+-
+---
+--- Name: salidas_tornos update_salidas_tornos_modtime; Type: TRIGGER; Schema: public; Owner: vmv
+---
+-
+-CREATE TRIGGER update_salidas_tornos_modtime BEFORE UPDATE ON public.salidas_tornos FOR EACH ROW EXECUTE FUNCTION public.update_modification_column();
+-
+-
+---
+--- Name: salidas_tornos salidas_tornos_codigo_empleado_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vmv
+---
+-
+-ALTER TABLE ONLY public.salidas_tornos
+-    ADD CONSTRAINT salidas_tornos_codigo_empleado_fkey FOREIGN KEY (codigo_empleado) REFERENCES public.users(codigo_empleado) ON UPDATE CASCADE ON DELETE RESTRICT;
+-
+-
+---
+--- Name: salidas_tornos salidas_tornos_usuario_fkey; Type: FK CONSTRAINT; Schema: public; Owner: vmv
+---
+-
+-ALTER TABLE ONLY public.salidas_tornos
+-    ADD CONSTRAINT salidas_tornos_usuario_fkey FOREIGN KEY (usuario) REFERENCES public.users(id);
+-
+-
+---
+--- PostgreSQL database dump complete
+---
+-
++--
++-- PostgreSQL database dump
++--
++
++-- Dumped from database version 15.2
++-- Dumped by pg_dump version 15.2
++
++SET statement_timeout = 0;
++SET lock_timeout = 0;
++SET idle_in_transaction_session_timeout = 0;
++SET client_encoding = 'UTF8';
++SET standard_conforming_strings = on;
++SELECT pg_catalog.set_config('search_path', '', false);
++SET check_function_bodies = false;
++SET xmloption = content;
++SET client_min_messages = warning;
++SET row_security = off;
++
++--
++-- Name: f_data_creation(); Type: FUNCTION; Schema: public; Owner: vmv
++--
++
++CREATE FUNCTION public.f_data_creation() RETURNS trigger
++    LANGUAGE plpgsql
++    AS $$
++begin
++new.date_creation = now();
++return new;
++end
++$$;
++
++
++ALTER FUNCTION public.f_data_creation() OWNER TO vmv;
++
++--
++-- Name: f_data_modification_empresa_e(); Type: FUNCTION; Schema: public; Owner: vmv
++--
++
++CREATE FUNCTION public.f_data_modification_empresa_e() RETURNS trigger
++    LANGUAGE plpgsql
++    AS $$
++begin
++new.date_modification=now();
++insert into log_empresas_exteriores (
++	id_empresa,	
++	nombre_persona,
++	empresa_exterior,
++	peticionario,
++	nota,
++	recepcion,
++	fecha_salida,
++	date_modification,
++	usuario,
++	fecha_entrada,
++	date_creation
++) values(
++	old.id,
++	old.nombre_persona,
++	old.empresa_exterior,
++	old.peticionario,
++	old.nota,
++	old.recepcion,
++	old.fecha_salida,
++	old.date_modification,
++	old.usuario,
++	old.fecha_entrada,
++	new.date_creation
++	);
++return new;
++end
++$$;
++
++
++ALTER FUNCTION public.f_data_modification_empresa_e() OWNER TO vmv;
++
++--
++-- Name: f_data_modification_entrada_v(); Type: FUNCTION; Schema: public; Owner: vmv
++--
++
++CREATE FUNCTION public.f_data_modification_entrada_v() RETURNS trigger
++    LANGUAGE plpgsql
++    AS $$begin
++new.date_modification=now();
++insert into log_entradas_vehiculos (
++	empresa,
++	nombre_conductor,
++	matricula,
++	fecha_entrada,
++	fecha_salida,
++	date_modification,
++	usuario,
++	clase_carga,
++	recepcion,
++	id_empresa,
++	date_creation
++) 
++values(
++	old.empresa,
++	old.nombre_conductor,
++	old.matricula,
++	old.fecha_entrada,
++	old.fecha_salida,
++	new.date_modification,
++	old.usuario,
++	old.clase_carga,
++	old.recepcion,
++	old.id,
++	old.date_creation	
++	);
++return new;
++end$$;
++
++
++ALTER FUNCTION public.f_data_modification_entrada_v() OWNER TO vmv;
++
++--
++-- Name: f_data_modification_user(); Type: FUNCTION; Schema: public; Owner: vmv
++--
++
++CREATE FUNCTION public.f_data_modification_user() RETURNS trigger
++    LANGUAGE plpgsql
++    AS $$begin
++new.date_modification=now();
++insert into log_users(
++	id_user,
++	name,
++	email,
++	password,
++	online,
++	type,
++	date_creation,
++	date_modification	
++) 
++values(
++	old.id,
++	old.name,
++	old.email,
++	old.password,
++	old.online,
++	old.type,
++	old.date_creation,
++	new.date_modification	
++	);
++return new;
++end$$;
++
++
++ALTER FUNCTION public.f_data_modification_user() OWNER TO vmv;
++
++--
++-- Name: f_date_erasure_empresas_e(); Type: FUNCTION; Schema: public; Owner: vmv
++--
++
++CREATE FUNCTION public.f_date_erasure_empresas_e() RETURNS trigger
++    LANGUAGE plpgsql
++    AS $$begin
++insert into log_empresas_exteriores 
++	values (	
++	old.nombre_persona,
++	old.empresa_exterior,	
++	old.peticionario,
++	old.nota,
++	old.recepcion,	
++	old.fecha_salida,
++	old.date_modification,
++	old.telefono_persona,
++	old.usuario,
++	old.fecha_entrada,
++	old.id,	
++	now(),
++	old.date_creation
++	);
++
++return old;
++end$$;
++
++
++ALTER FUNCTION public.f_date_erasure_empresas_e() OWNER TO vmv;
++
++--
++-- Name: f_date_erasure_entradas_v(); Type: FUNCTION; Schema: public; Owner: vmv
++--
++
++CREATE FUNCTION public.f_date_erasure_entradas_v() RETURNS trigger
++    LANGUAGE plpgsql
++    AS $$begin
++insert into log_entradas_vehiculos 
++	values (		
++	old.empresa,
++	old.nombre_conductor,	
++	old.matricula,
++	old.fecha_entrada,
++	old.fecha_salida,	
++	old.date_modification,
++	old.usuario,
++	old.clase_carga,
++	old.recepcion,
++	old.id,	
++	now(),
++	old.date_creation
++	);
++
++return old;
++end$$;
++
++
++ALTER FUNCTION public.f_date_erasure_entradas_v() OWNER TO vmv;
++
++--
++-- Name: f_date_erasure_users(); Type: FUNCTION; Schema: public; Owner: vmv
++--
++
++CREATE FUNCTION public.f_date_erasure_users() RETURNS trigger
++    LANGUAGE plpgsql
++    AS $$begin
++insert into log_users
++	values (		
++	old.name,
++	old.email,
++	old.password,
++	old.online,	
++	old.type,
++	old.date_creation,
++	new.date_modification,
++	now(),
++	old.id
++	);
++
++return old;
++end$$;
++
++
++ALTER FUNCTION public.f_date_erasure_users() OWNER TO vmv;
++
++SET default_tablespace = '';
++
++SET default_table_access_method = heap;
++
++--
++-- Name: empresas_exteriores; Type: TABLE; Schema: public; Owner: vmv
++--
++
++CREATE TABLE public.empresas_exteriores (
++    nombre_persona text NOT NULL,
++    empresa_exterior text NOT NULL,
++    peticionario text,
++    telefono_persona text,
++    date_creation timestamp with time zone,
++    fecha_entrada timestamp with time zone,
++    firma text,
++    id integer NOT NULL,
++    nota character varying(100),
++    usuario integer,
++    recepcion boolean DEFAULT false,
++    fecha_salida timestamp with time zone,
++    date_modification timestamp with time zone
++);
++
++
++ALTER TABLE public.empresas_exteriores OWNER TO vmv;
++
++--
++-- Name: empresas_exteriores_id_seq; Type: SEQUENCE; Schema: public; Owner: vmv
++--
++
++CREATE SEQUENCE public.empresas_exteriores_id_seq
++    AS integer
++    START WITH 1
++    INCREMENT BY 1
++    NO MINVALUE
++    NO MAXVALUE
++    CACHE 1;
++
++
++ALTER TABLE public.empresas_exteriores_id_seq OWNER TO vmv;
++
++--
++-- Name: empresas_exteriores_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: vmv
++--
++
++ALTER SEQUENCE public.empresas_exteriores_id_seq OWNED BY public.empresas_exteriores.id;
++
++
++--
++-- Name: entradas_vehiculos; Type: TABLE; Schema: public; Owner: vmv
++--
++
++CREATE TABLE public.entradas_vehiculos (
++    id integer NOT NULL,
++    firma text DEFAULT 'firma'::text NOT NULL,
++    recepcion boolean DEFAULT false,
++    vigilancia boolean DEFAULT false,
++    empresa character varying(30) DEFAULT 'empresa'::text NOT NULL,
++    nombre_conductor character varying(50) DEFAULT 'nombre_conductor'::text,
++    matricula character varying(15) DEFAULT 'matricula'::text NOT NULL,
++    date_creation timestamp with time zone,
++    fecha_entrada timestamp with time zone,
++    fecha_salida timestamp with time zone,
++    date_modification timestamp with time zone,
++    clase_carga character varying(100),
++    usuario integer
++);
++
++
++ALTER TABLE public.entradas_vehiculos OWNER TO vmv;
++
++--
++-- Name: entrada_vehiculo_id_seq; Type: SEQUENCE; Schema: public; Owner: vmv
++--
++
++CREATE SEQUENCE public.entrada_vehiculo_id_seq
++    AS integer
++    START WITH 1
++    INCREMENT BY 1
++    NO MINVALUE
++    NO MAXVALUE
++    CACHE 1;
++
++
++ALTER TABLE public.entrada_vehiculo_id_seq OWNER TO vmv;
++
++--
++-- Name: entrada_vehiculo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: vmv
++--
++
++ALTER SEQUENCE public.entrada_vehiculo_id_seq OWNED BY public.entradas_vehiculos.id;
++
++
++--
++-- Name: log_empresas_exteriores; Type: TABLE; Schema: public; Owner: vmv
++--
++
++CREATE TABLE public.log_empresas_exteriores (
++    nombre_persona text,
++    empresa_exterior text,
++    peticionario text,
++    nota character varying(100),
++    recepcion boolean,
++    fecha_salida timestamp with time zone,
++    date_modification timestamp with time zone,
++    telefono_persona text,
++    usuario integer,
++    fecha_entrada text,
++    id_empresa integer,
++    date_erasure timestamp with time zone,
++    date_creation timestamp with time zone
++);
++
++
++ALTER TABLE public.log_empresas_exteriores OWNER TO vmv;
++
++--
++-- Name: log_entradas_vehiculos; Type: TABLE; Schema: public; Owner: vmv
++--
++
++CREATE TABLE public.log_entradas_vehiculos (
++    empresa character varying(30),
++    nombre_conductor character varying(50),
++    matricula character varying(15),
++    fecha_entrada timestamp with time zone,
++    fecha_salida timestamp with time zone,
++    date_modification timestamp with time zone,
++    usuario integer,
++    clase_carga character varying(100),
++    recepcion boolean,
++    id_empresa integer,
++    date_erasure timestamp with time zone,
++    date_creation timestamp with time zone
++);
++
++
++ALTER TABLE public.log_entradas_vehiculos OWNER TO vmv;
++
++--
++-- Name: log_users; Type: TABLE; Schema: public; Owner: vmv
++--
++
++CREATE TABLE public.log_users (
++    name character varying(100),
++    email character varying(100),
++    password character varying(100),
++    online boolean,
++    type "char",
++    date_creation timestamp with time zone,
++    date_modification timestamp with time zone,
++    date_erasure timestamp with time zone,
++    id_user integer
++);
++
++
++ALTER TABLE public.log_users OWNER TO vmv;
++
++--
++-- Name: salidas_empleados_id_seq; Type: SEQUENCE; Schema: public; Owner: vmv
++--
++
++CREATE SEQUENCE public.salidas_empleados_id_seq
++    START WITH 1
++    INCREMENT BY 1
++    NO MINVALUE
++    NO MAXVALUE
++    CACHE 1;
++
++
++ALTER TABLE public.salidas_empleados_id_seq OWNER TO vmv;
++
++--
++-- Name: salidas_empleados; Type: TABLE; Schema: public; Owner: vmv
++--
++
++CREATE TABLE public.salidas_empleados (
++    id integer DEFAULT nextval('public.salidas_empleados_id_seq'::regclass) NOT NULL,
++    codigo_empleado character varying(4) NOT NULL,
++    nombre_persona character varying(50) NOT NULL,
++    fecha_salida timestamp with time zone,
++    fecha_entrada timestamp with time zone,
++    date_creation timestamp with time zone,
++    date_modification timestamp with time zone,
++    usuario character varying,
++    motivo text
++);
++
++
++ALTER TABLE public.salidas_empleados OWNER TO vmv;
++
++--
++-- Name: users; Type: TABLE; Schema: public; Owner: vmv
++--
++
++CREATE TABLE public.users (
++    id integer NOT NULL,
++    name character varying(100),
++    email character varying(100),
++    password character varying(100),
++    online boolean DEFAULT false,
++    type "char",
++    date_creation timestamp with time zone,
++    date_modification timestamp with time zone,
++    codigo_empleado character varying(5)
++);
++
++
++ALTER TABLE public.users OWNER TO vmv;
++
++--
++-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: vmv
++--
++
++CREATE SEQUENCE public.users_id_seq
++    AS integer
++    START WITH 1
++    INCREMENT BY 1
++    NO MINVALUE
++    NO MAXVALUE
++    CACHE 1;
++
++
++ALTER TABLE public.users_id_seq OWNER TO vmv;
++
++--
++-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: vmv
++--
++
++ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
++
++
++--
++-- Name: v_firma_no_entradas; Type: VIEW; Schema: public; Owner: vmv
++--
++
++CREATE VIEW public.v_firma_no_entradas AS
++ SELECT entradas_vehiculos.id,
++    entradas_vehiculos.nombre_conductor,
++    entradas_vehiculos.vigilancia,
++    entradas_vehiculos.recepcion,
++    entradas_vehiculos.empresa,
++    entradas_vehiculos.matricula,
++    entradas_vehiculos.fecha_entrada,
++    entradas_vehiculos.fecha_salida,
++    entradas_vehiculos.date_creation AS fecha_creacion,
++    entradas_vehiculos.date_modification AS fecha_modificacion
++   FROM public.entradas_vehiculos;
++
++
++ALTER TABLE public.v_firma_no_entradas OWNER TO vmv;
++
++--
++-- Name: empresas_exteriores id; Type: DEFAULT; Schema: public; Owner: vmv
++--
++
++ALTER TABLE ONLY public.empresas_exteriores ALTER COLUMN id SET DEFAULT nextval('public.empresas_exteriores_id_seq'::regclass);
++
++
++--
++-- Name: entradas_vehiculos id; Type: DEFAULT; Schema: public; Owner: vmv
++--
++
++ALTER TABLE ONLY public.entradas_vehiculos ALTER COLUMN id SET DEFAULT nextval('public.entrada_vehiculo_id_seq'::regclass);
++
++
++--
++-- Name: users id; Type: DEFAULT; Schema: public; Owner: vmv
++--
++
++ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
++
++
++--
++-- Name: empresas_exteriores empresas_exteriores_pkey; Type: CONSTRAINT; Schema: public; Owner: vmv
++--
++
++ALTER TABLE ONLY public.empresas_exteriores
++    ADD CONSTRAINT empresas_exteriores_pkey PRIMARY KEY (id);
++
++
++--
++-- Name: entradas_vehiculos entrada_vehiculo_pkey; Type: CONSTRAINT; Schema: public; Owner: vmv
++--
++
++ALTER TABLE ONLY public.entradas_vehiculos
++    ADD CONSTRAINT entrada_vehiculo_pkey PRIMARY KEY (id);
++
++
++--
++-- Name: salidas_empleados salidas_empleados_pkey; Type: CONSTRAINT; Schema: public; Owner: vmv
++--
++
++ALTER TABLE ONLY public.salidas_empleados
++    ADD CONSTRAINT salidas_empleados_pkey PRIMARY KEY (id);
++
++
++--
++-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: vmv
++--
++
++ALTER TABLE ONLY public.users
++    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
++
++
++--
++-- Name: empresas_exteriores tr_creation_empresas_e; Type: TRIGGER; Schema: public; Owner: vmv
++--
++
++CREATE TRIGGER tr_creation_empresas_e BEFORE INSERT ON public.empresas_exteriores FOR EACH ROW EXECUTE FUNCTION public.f_data_creation();
++
++
++--
++-- Name: entradas_vehiculos tr_creation_entradas_v; Type: TRIGGER; Schema: public; Owner: vmv
++--
++
++CREATE TRIGGER tr_creation_entradas_v BEFORE INSERT ON public.entradas_vehiculos FOR EACH ROW EXECUTE FUNCTION public.f_data_creation();
++
++
++--
++-- Name: users tr_date_creation_users; Type: TRIGGER; Schema: public; Owner: vmv
++--
++
++CREATE TRIGGER tr_date_creation_users BEFORE INSERT ON public.users FOR EACH ROW EXECUTE FUNCTION public.f_data_creation();
++
++
++--
++-- Name: users tr_date_modification_user; Type: TRIGGER; Schema: public; Owner: vmv
++--
++
++CREATE TRIGGER tr_date_modification_user BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.f_data_modification_user();
++
++
++--
++-- Name: empresas_exteriores tr_erase_empresa_e; Type: TRIGGER; Schema: public; Owner: vmv
++--
++
++CREATE TRIGGER tr_erase_empresa_e AFTER DELETE ON public.empresas_exteriores FOR EACH ROW EXECUTE FUNCTION public.f_date_erasure_empresas_e();
++
++
++--
++-- Name: entradas_vehiculos tr_erase_entradas_v; Type: TRIGGER; Schema: public; Owner: vmv
++--
++
++CREATE TRIGGER tr_erase_entradas_v BEFORE DELETE ON public.entradas_vehiculos FOR EACH ROW EXECUTE FUNCTION public.f_date_erasure_entradas_v();
++
++
++--
++-- Name: users tr_erase_user; Type: TRIGGER; Schema: public; Owner: vmv
++--
++
++CREATE TRIGGER tr_erase_user BEFORE DELETE ON public.users FOR EACH ROW EXECUTE FUNCTION public.f_date_erasure_users();
++
++
++--
++-- Name: empresas_exteriores tr_modification_empresa_e; Type: TRIGGER; Schema: public; Owner: vmv
++--
++
++CREATE TRIGGER tr_modification_empresa_e BEFORE UPDATE ON public.empresas_exteriores FOR EACH ROW EXECUTE FUNCTION public.f_data_modification_empresa_e();
++
++
++--
++-- Name: entradas_vehiculos tr_modification_entradas_v; Type: TRIGGER; Schema: public; Owner: vmv
++--
++
++CREATE TRIGGER tr_modification_entradas_v BEFORE UPDATE ON public.entradas_vehiculos FOR EACH ROW EXECUTE FUNCTION public.f_data_modification_entrada_v();
++
++
++--
++-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: pg_database_owner
++--
++
++GRANT USAGE ON SCHEMA public TO readonly;
++GRANT ALL ON SCHEMA public TO readwrite;
++
++
++--
++-- Name: TABLE empresas_exteriores; Type: ACL; Schema: public; Owner: vmv
++--
++
++GRANT SELECT ON TABLE public.empresas_exteriores TO readonly;
++
++
++--
++-- Name: TABLE entradas_vehiculos; Type: ACL; Schema: public; Owner: vmv
++--
++
++GRANT SELECT ON TABLE public.entradas_vehiculos TO readonly;
++
++
++--
++-- Name: TABLE salidas_empleados; Type: ACL; Schema: public; Owner: vmv
++--
++
++GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.salidas_empleados TO readwrite;
++
++
++--
++-- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: vmv
++--
++
++ALTER DEFAULT PRIVILEGES FOR ROLE vmv IN SCHEMA public GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO readwrite;
++
++
++--
++-- PostgreSQL database dump complete
++--
++

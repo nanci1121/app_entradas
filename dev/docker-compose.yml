@@ -44,7 +44,7 @@ services:
     env_file:
       - .env
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PORT=3000
       - PGHOST=db
       - PGUSER=${POSTGRES_USER}
