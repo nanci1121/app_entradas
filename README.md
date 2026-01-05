@@ -1,5 +1,7 @@
 # Servidor App Entradas
 
+## Español
+
 Aplicación Node.js dockerizada para gestión de entradas con autenticación JWT, WebSockets (Socket.IO) y base de datos PostgreSQL.
 
 ## 📋 Tabla de Contenidos
@@ -555,4 +557,105 @@ docker compose -f prod/docker-compose.yml restart
 
 ---
 
-**Última actualización**: 22 de diciembre de 2025# app_entradas
+**Última actualización**: 22 de diciembre de 2025
+
+---
+
+## English
+
+Dockerized Node.js app for vehicle entry management with JWT auth, real-time WebSockets (Socket.IO), and PostgreSQL.
+
+### 📋 Table of Contents
+
+- [Architecture](#architecture)
+- [Requirements](#requirements)
+- [Configuration](#configuration)
+- [Deployment](#deployment)
+- [Server Migration](#server-migration)
+- [Database Administration](#database-administration)
+- [Security](#security)
+- [Monitoring](#monitoring)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+### 🏗️ Architecture
+
+- **Stack**: Node.js 20 (Alpine) + Express, PostgreSQL 15.2 (Alpine), Socket.IO, JWT auth, Docker/Compose.
+- **Services**: App exposes port 7202 (prod) for REST + WebSockets; Postgres on internal network only.
+- **Main endpoints**: `/api/login`, `/api/users`, `/api/entradas`, `/api/externas`, `/api/internas`, `/api/tornos`, `/api/ping`; WebSockets use JWT handshake.
+
+### 📦 Requirements
+
+- Prod: Docker 20.10+, Compose v2+, Linux, open port 7202, ~2GB RAM / 10GB disk.
+- Dev: Local Node flow; Docker dev stack removed.
+
+### ⚙️ Configuration
+
+- Copy `.env.example` to `.env` and set values (PORT, NODE_ENV, CORS_ORIGIN, JWT_KEY >=32 chars, PG* vars, POSTGRES_* for DB service).
+- Security baked in: non-root container user, Alpine images, health checks, log rotation, Helmet, CORS whitelist, rate limit 100 req/min/IP, JWT 24h, bcrypt passwords, DB not exposed.
+
+### 🚀 Deployment
+
+**Production**
+1) Build image: `docker build -t srv_alpine:prod -f prod/Dockerfile app`
+2) Start: `docker compose -f prod/docker-compose.yml --env-file .env up -d`
+3) Health: `curl http://localhost:7202/api/ping` → `pong`
+4) Logs: `docker compose -f prod/docker-compose.yml logs -f app`
+
+**Local (non-Docker)**
+```bash
+cd app
+npm install
+npm run start
+```
+
+Useful commands: down/with volumes, ps, exec into app/db, health inspect, etc. (same as Spanish section).
+
+### 🔄 Server Migration (summary)
+
+1) Prep target server: install Docker/Compose, verify versions.
+2) Transfer code and `.env.example`; create `.env` for target.
+3) Backup DB on source (`pg_dump` via Compose or native); transfer backup.
+4) On target: start db, restore backup, build image, bring stack up with Compose.
+5) Verify: health checks, login test, logs, DB connectivity; set firewall; optional reverse proxy/SSL.
+6) Backups/cron script available; rollback by stopping new stack and re-enabling old.
+
+### 🗄️ Database Administration
+
+- PgAdmin exposed only on localhost:7201 (tunnel via SSH if remote). Use env creds for PgAdmin and DB connection host `db`, port `5432`.
+- CLI snippets: `psql` access, describe tables, backups/restores, activity view, etc. (mirrors Spanish commands).
+
+### 🔒 Security
+
+- Pre-prod checklist: strong `.env`, long `JWT_KEY`, strict `CORS_ORIGIN`, DB not exposed, firewall, backups, log monitoring, health checks.
+- Dependencies: run `npm audit` inside `app/`; rebuild image if updating.
+- Secrets rotation: generate new JWT_KEY (crypto/openssl/urandom) and restart (old tokens invalidated).
+
+### 📊 Monitoring
+
+- System: `free -h`, `df -h`, `top`, `ss -tuln`.
+- Docker: `docker stats`, `docker compose ... logs`, health via `docker compose ... ps` and `docker inspect` health blocks.
+- Log filtering: `grep -i error`, time windows via `--since`, export logs to file.
+
+### 🔧 Troubleshooting
+
+- App not starting: check app logs, env vars, restart container.
+- DB connection issues: ensure db healthy, test `nc -zv db 5432`, check Postgres logs, restart db.
+- JWT auth: verify `JWT_KEY` matches; users must re-login after secret change.
+- CORS: ensure frontend origin in `CORS_ORIGIN`, restart app.
+- Rate limit: adjust window/max in `app/src/index.js`, rebuild image.
+- Reset: `docker compose ... down -v` (data loss) or simple `restart` to keep data.
+
+### 📚 References
+
+- Express docs, Socket.IO docs, Official Postgres image, Node.js best practices, Docker Compose reference.
+
+### 📝 Additional Notes
+
+- Root `.sql` files are reference backups.
+- `wait-for.sh` in `app/` for dependency waits.
+- Rate limit defaults 100 req/min/IP; adjust if needed.
+- Docker logs rotate automatically (10MB × 3 files).
+
+**Last update**: December 22, 2025

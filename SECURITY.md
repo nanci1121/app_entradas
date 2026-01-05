@@ -1,5 +1,7 @@
 # 🔒 Guía de Seguridad
 
+## Español
+
 Documentación de las medidas de seguridad implementadas y mejores prácticas para mantener la aplicación segura.
 
 ## 📋 Resumen de Medidas Implementadas
@@ -388,7 +390,7 @@ action = iptables-multiport[name=app, port="7202"]
 
 ---
 
-## 📋 Checklist de Seguridad
+### Checklist de Seguridad
 
 ### Antes de Producción
 
@@ -398,6 +400,49 @@ action = iptables-multiport[name=app, port="7202"]
 - [ ] Postgres sin puerto expuesto públicamente
 - [ ] HTTPS configurado (si aplica)
 - [ ] Firewall activo y configurado
+
+---
+
+## English
+
+Security measures in place and best practices to keep the app secure.
+
+### 📋 Implemented Measures
+
+- **Containers**: Non-root `node` user, Alpine images, health checks, log rotation (10MB × 3), isolated `app-network`.
+- **App**: Helmet headers, strict CORS whitelist, rate limit 100 req/min/IP, JWT 24h (HS256), bcrypt passwords, env vars externalized, trust proxy set.
+- **Database**: Not exposed publicly, creds from `.env`, Docker internal network, health checks.
+
+### 🔐 Security Configuration
+
+- **Helmet**: Enabled in `app/src/index.js`; verify with `curl -I /api/ping`.
+- **CORS**: Origins from `CORS_ORIGIN` (comma-separated). Example env shown; test with Origin header via `curl`.
+- **Rate limiting**: Default 100 req/min; can customize per route (e.g., login limiter) in `app/src/index.js`.
+- **JWT**: 24h HS256, secret `JWT_KEY`; generate via Node/openssl/urandom. Login to get token; renew at `/api/login/renew`.
+- **Bcrypt**: Defaults to 10 rounds; increase in `controladores/usuarios.js` if needed (note performance impact).
+- **Validation**: Express-validator checks in routes; strengthen with length/format constraints as needed.
+
+### 🛡️ Production Hardening
+
+- **PostgreSQL**: Keep port internal, env creds, optional pg_hba tuning; rotate DB passwords; inspect connections.
+- **HTTPS/Proxy**: nginx + Let's Encrypt example provided (TLS 1.2/1.3, security headers, WebSocket support, HTTP→HTTPS redirect).
+- **Firewall**: UFW defaults deny incoming/allow outgoing; allow ssh, 80/443 (or 7202 if no proxy); review rules.
+
+### 🔍 Audit & Monitoring
+
+- **Dependencies**: `npm audit`, filter by severity, `npm audit fix` (careful with `--force`).
+- **Image scan**: Trivy example for full and critical/high severities.
+- **Logs**: Grep app logs for auth/token/rate-limit errors.
+- **Fail2Ban (optional)**: Example jail targeting Docker logs with basic defaults.
+
+### 📋 Security Checklist (Pre-prod)
+
+- [ ] `.env` with unique secrets (no defaults)
+- [ ] `JWT_KEY` ≥ 32 random chars
+- [ ] `CORS_ORIGIN` limited to allowed domains
+- [ ] Postgres not publicly exposed
+- [ ] HTTPS configured (if applicable)
+- [ ] Firewall active and configured
 - [ ] Rate limiting apropiado para tu caso de uso
 - [ ] Backups automáticos configurados
 - [ ] Monitoreo de logs activo

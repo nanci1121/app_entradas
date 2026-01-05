@@ -17,6 +17,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    ports:
+      - "127.0.0.1:5432:5432"
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -29,7 +31,7 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     ports:
-      - "127.0.0.1:7201:80"
+      - "127.0.0.1:7301:80"
     networks:
       - app-network
     depends_on:
@@ -37,10 +39,11 @@ services:
         condition: service_healthy
 
   app:
-    image: srv_alpine:prod
+    image: srv_alpine:dev
     restart: unless-stopped
+    command: npm run dev:simple
     ports:
-      - "7202:3000"
+      - "7302:3000"
     env_file:
       - .env
     environment:
@@ -53,8 +56,8 @@ services:
       - PGPORT=5432
       - JWT_KEY=${JWT_KEY}
     volumes:
-      - ../app:/app
-      - /app/node_modules
+      - ../app/src:/app/src
+      - ../app/tsconfig.json:/app/tsconfig.json
     depends_on:
       db:
         condition: service_healthy

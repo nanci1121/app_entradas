@@ -4,6 +4,7 @@ app/node_modules/
 
 # Builds y cobertura
 dist/
+app/dist/
 build/
 coverage/
 .nyc_output/
@@ -42,3 +43,7 @@ Thumbs.db
 # Backups SQL (solo raíz del proyecto)
 /*.sql
 /*.sql.gz
+
+# TypeScript compiled
+*.tsbuildinfo
+

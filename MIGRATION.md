@@ -1,5 +1,7 @@
 # 📦 Guía de Migración al Nuevo Servidor
 
+## Español
+
 Esta guía proporciona un checklist paso a paso para migrar la aplicación al nuevo servidor de forma segura.
 
 ## ✅ Checklist Pre-Migración
@@ -398,6 +400,44 @@ docker compose -f prod/docker-compose.yml exec app npm list
 ```
 
 ---
+
+## English
+
+Step-by-step checklist to migrate the app to a new server safely.
+
+### ✅ Pre-Migration Checklist
+
+- **Source**: Full DB backup, ensure no critical ops, document ports/config, export current env vars.
+- **Target**: Docker + Compose installed, port 7202 free, firewall configured, ≥10GB disk, SSH access.
+
+### 🔄 Migration Flow
+
+1) **Prepare target server**: SSH in, install Docker/Compose, re-login to apply group changes, verify versions.
+2) **DB backup on source**: From project dir run `pg_dump` via Compose (`prod/docker-compose.yml`) or native Postgres; gzip and note size.
+3) **Transfer files**: Tar `app/`, `prod/`, `docker-compose.yml`, `.env.example`, and backups; copy via `scp` to target.
+4) **Configure target**: Create project dir, untar code, create `.env` from example with new credentials and domains.
+5) **Build image**: `docker build -t srv_alpine:prod -f prod/Dockerfile app` and verify with `docker images`.
+6) **Start DB + restore**: `docker compose -f prod/docker-compose.yml up -d db`; wait for health; gunzip backup; `docker cp` into db container; restore with `psql`; verify tables/counts.
+7) **Bring up app**: `docker compose -f prod/docker-compose.yml --env-file .env up -d`; check `ps`, logs, and `curl http://localhost:7202/api/ping` → `pong`.
+8) **Post-migration checks**: ping, login test, health checks, logs, DB connectivity (`nc -zv db 5432`), protected endpoint with valid token.
+9) **Network/Proxy**: Configure firewall (allow 7202 or proxy ports), optionally set nginx reverse proxy with WebSocket support and Let's Encrypt SSL.
+10) **Backups**: Install daily cron script to dump DB (keeps last 7 backups); ensure permissions and log path.
+11) **Rollback**: If needed, `docker compose ... down` on new server and re-up stack on old server; redirect traffic back.
+12) **DNS/Docs**: Update DNS records, wait propagation, update IP/creds in docs/password manager, notify team; monitor uptime/logs/backups.
+13) **Cleanup old server**: After confidence window, `docker compose -f prod/docker-compose.yml down -v`; keep backups until fully sure.
+
+### 🆘 Migration Troubleshooting
+
+- **Cannot connect to DB**: `docker compose ... ps db`; check env via `exec app env | grep PG`; view `logs db`.
+- **Port already in use**: `sudo ss -tulpn | grep 7202`; free or change port in compose.
+- **Large/slow backup**: Dump per-table or gzip with `-9` as shown above.
+- **Health check failing**: `curl /api/ping`; inspect app logs; ensure dependencies installed (`npm list`).
+
+### Notes
+
+- Use SSH tunnel for PgAdmin if remote.
+- Regenerate `JWT_KEY` and creds when moving servers.
+- Keep old backups until the new stack runs stable.
 
 ## 📞 Contacto y Soporte
 

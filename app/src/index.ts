@@ -1,0 +1,77 @@
+// Cargar variables de entorno PRIMERO
+import dotenv from 'dotenv';
+dotenv.config();
+
+import express, { Application, Request, Response } from 'express';
+import path from 'path';
+import http from 'http';
+import { Server as SocketIOServer } from 'socket.io';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger';
+import { applySecurityMiddleware } from './config/security';
+import { globalErrorHandler, notFoundHandler } from './middelwares/error-handler';
+import { logger, captureConsole } from './helpers/logger';
+import { registerSocketHandlers } from './sockets/socket';
+
+// Redirigir console.* a logger
+captureConsole();
+
+// APP de express
+const app: Application = express();
+const port = process.env.PORT || 3000;
+
+// Node Server
+const server = http.createServer(app);
+export const io = new SocketIOServer(server);
+
+// Registrar manejadores de sockets
+registerSocketHandlers(io);
+
+// Seguridad (Helmet, CORS, rate limiting, logging HTTP)
+applySecurityMiddleware(app);
+
+// Path publico
+const publicPath = path.resolve(__dirname, 'public');
+app.use(express.static(publicPath));
+
+// Lectura y parseo del body
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+// 📚 Documentación Swagger/OpenAPI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: "API Entradas - Documentación"
+}));
+
+// Ruta para obtener el JSON de OpenAPI
+app.get('/api-docs.json', (_req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+});
+
+app.get('/', (_req: Request, res: Response) => {
+    res.send('Hello World!')
+});
+
+// Mis rutas
+app.use('/api/', require('./routes/usuarios'));
+app.use('/api/entradas', require('./routes/entradas'));
+app.use('/api/externas', require('./routes/externas'));
+app.use('/api/internas', require('./routes/internas'));
+app.use('/api/tornos', require('./routes/tornos'));
+
+// 🟢 Ruta de salud (para ver si el servidor responde)
+app.get('/api/ping', (_req: Request, res: Response) => {
+    res.status(200).send('pong');
+});
+
+// 404 y handler de errores
+app.use(notFoundHandler);
+app.use(globalErrorHandler);
+
+// Ejecución del servidor
+server.listen(port, () => {
+    logger.info(`App Entradas listening on port ${port}`);
+    logger.info(`Documentación API: http://localhost:${port}/api-docs`);
+});
