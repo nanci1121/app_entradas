@@ -37,6 +37,15 @@ jobs:
         run: |
           npm audit --audit-level=high || true
 
+      - name: Create dummy .env file for Docker Compose
+        run: |
+          echo "POSTGRES_USER=test_user" > prod/.env
+          echo "POSTGRES_PASSWORD=test_password" >> prod/.env
+          echo "PGDATABASE=test_db" >> prod/.env
+          echo "JWT_KEY=test_secret" >> prod/.env
+          echo "PGADMIN_DEFAULT_EMAIL=admin@example.com" >> prod/.env
+          echo "PGADMIN_DEFAULT_PASSWORD=admin" >> prod/.env
+
       - name: Validate docker-compose
         run: docker compose -f prod/docker-compose.yml config
 
