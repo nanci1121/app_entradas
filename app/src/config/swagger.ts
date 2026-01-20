@@ -15,12 +15,12 @@ const swaggerOptions: Options = {
         },
         servers: [
             {
-                url: 'http://localhost:3000',
-                description: 'Servidor local (env PORT)'
+                url: 'http://10.192.93.0:7302',
+                description: 'Servidor de Desarrollo (10.192.93.0)'
             },
             {
-                url: 'http://localhost:7202',
-                description: 'Servidor de Producción'
+                url: 'http://localhost:7302',
+                description: 'Localhost (si estás en el servidor)'
             }
         ],
         components: {
@@ -115,69 +115,14 @@ const swaggerOptions: Options = {
             {
                 xTokenAuth: []
             }
-        ],
-        paths: {
-            '/api/login': {
-                post: {
-                    summary: 'Login de usuario',
-                    security: [],
-                    responses: {
-                        200: { description: 'Login correcto' },
-                        401: { description: 'Credenciales inválidas' }
-                    }
-                }
-            },
-            '/api/login/new': {
-                post: {
-                    summary: 'Crear usuario',
-                    security: [],
-                    responses: {
-                        200: { description: 'Usuario creado' },
-                        400: { description: 'Email ya existe' }
-                    }
-                }
-            },
-            '/api/login/renew': {
-                get: {
-                    summary: 'Renovar token',
-                    security: [{ xTokenAuth: [] }],
-                    responses: {
-                        200: { description: 'Token renovado' },
-                        401: { description: 'Token inválido' }
-                    }
-                }
-            },
-            '/api/entradas': {
-                get: {
-                    summary: 'Obtener entradas',
-                    security: [{ xTokenAuth: [] }],
-                    responses: { 200: { description: 'Listado de entradas' } }
-                }
-            },
-            '/api/externas': {
-                get: {
-                    summary: 'Obtener externas',
-                    security: [{ xTokenAuth: [] }],
-                    responses: { 200: { description: 'Listado de externas' } }
-                }
-            },
-            '/api/internas': {
-                get: {
-                    summary: 'Obtener internas',
-                    security: [{ xTokenAuth: [] }],
-                    responses: { 200: { description: 'Listado de internas' } }
-                }
-            },
-            '/api/tornos': {
-                get: {
-                    summary: 'Obtener tornos',
-                    security: [{ xTokenAuth: [] }],
-                    responses: { 200: { description: 'Listado de tornos' } }
-                }
-            }
-        }
+        ]
     },
-    apis: ['./src/routes/*.ts', './src/routes/*.js', './src/controladores/*.ts', './src/controladores/*.js']
+    apis: [
+        `${__dirname}/../routes/*.ts`,
+        `${__dirname}/../routes/*.js`,
+        `${__dirname}/../controladores/*.ts`,
+        `${__dirname}/../controladores/*.js`
+    ]
 };
 
 export const swaggerSpec = swaggerJsdoc(swaggerOptions);
