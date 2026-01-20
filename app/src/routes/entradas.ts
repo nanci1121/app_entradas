@@ -19,49 +19,294 @@ const {
 
 const router = Router();
 
-// GET - Obtener vehículos dentro (últimas 12h o sin salida)
+/**
+ * @swagger
+ * /api/entradas:
+ *   get:
+ *     summary: Obtener vehículos dentro (últimas 12h o sin salida)
+ *     tags: [Entradas]
+ *     security:
+ *       - xTokenAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de entradas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/EntradaVehiculo'
+ */
 router.get('/', validarJWT, getEntradas);
 
-// GET - Obtener entradas para almacén
+/**
+ * @swagger
+ * /api/entradas/almacen:
+ *   get:
+ *     summary: Obtener entradas para almacén
+ *     tags: [Entradas]
+ *     security:
+ *       - xTokenAuth: []
+ *     responses:
+ *       200:
+ *         description: Entradas para almacén
+ */
 router.get('/almacen', validarJWT, getEntradasAlmacen);
 
-// GET - Obtener entradas para portería
+/**
+ * @swagger
+ * /api/entradas/porteria:
+ *   get:
+ *     summary: Obtener entradas para portería
+ *     tags: [Entradas]
+ *     security:
+ *       - xTokenAuth: []
+ *     responses:
+ *       200:
+ *         description: Entradas para portería
+ */
 router.get('/porteria', validarJWT, getEntradasPorteria);
 
-// GET - Buscar entrada por matrícula
+/**
+ * @swagger
+ * /api/entradas/by-matricula/{matricula}:
+ *   get:
+ *     summary: Buscar entrada por matrícula
+ *     tags: [Entradas]
+ *     security:
+ *       - xTokenAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: matricula
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Matrícula del vehículo
+ *     responses:
+ *       200:
+ *         description: Entrada encontrada
+ *       404:
+ *         description: No encontrada
+ */
 router.get('/by-matricula/:matricula', validarJWT, getEntradaByMatricula);
 
-// GET - Obtener entrada específica por ID
+/**
+ * @swagger
+ * /api/entradas/{id}:
+ *   get:
+ *     summary: Obtener entrada específica por ID
+ *     tags: [Entradas]
+ *     security:
+ *       - xTokenAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la entrada
+ *     responses:
+ *       200:
+ *         description: Entrada encontrada
+ *       404:
+ *         description: No encontrada
+ */
 router.get('/:id', validarJWT, getEntrada);
 
-// POST - Crear nueva entrada
+/**
+ * @swagger
+ * /api/entradas:
+ *   post:
+ *     summary: Crear nueva entrada de vehículo
+ *     tags: [Entradas]
+ *     security:
+ *       - xTokenAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - empresa
+ *               - matricula
+ *               - fecha_entrada
+ *             properties:
+ *               empresa:
+ *                 type: string
+ *               nombre_conductor:
+ *                 type: string
+ *               matricula:
+ *                 type: string
+ *               clase_carga:
+ *                 type: string
+ *               fecha_entrada:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       201:
+ *         description: Entrada creada
+ *       400:
+ *         description: Datos inválidos
+ */
 router.post(
     '/',
     [validarJWT, validateDateMiddleware(['fecha_entrada'])],
     setEntrada
 );
 
-// PUT - Actualizar estado de recepción
+/**
+ * @swagger
+ * /api/entradas/recepcion:
+ *   put:
+ *     summary: Actualizar estado de recepción
+ *     tags: [Entradas]
+ *     security:
+ *       - xTokenAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *               recepcion:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Estado actualizado
+ */
 router.put('/recepcion', validarJWT, updateRecepcionEntrada);
 
-// PUT - Actualizar entrada en portería
+/**
+ * @swagger
+ * /api/entradas/porteria:
+ *   put:
+ *     summary: Actualizar entrada en portería
+ *     tags: [Entradas]
+ *     security:
+ *       - xTokenAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *               fecha:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: Entrada actualizada
+ */
 router.put(
     '/porteria',
     [validarJWT, validateDateMiddleware(['fecha'])],
     updatePorteriaEntrada
 );
 
-// PUT - Consultar por rango de fechas
+/**
+ * @swagger
+ * /api/entradas/select:
+ *   put:
+ *     summary: Consultar entradas por rango de fechas
+ *     tags: [Entradas]
+ *     security:
+ *       - xTokenAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fecha_entrada1
+ *               - fecha_entrada2
+ *             properties:
+ *               fecha_entrada1:
+ *                 type: string
+ *                 format: date-time
+ *               fecha_entrada2:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: Lista filtrada de entradas
+ */
 router.put(
     '/select',
     [validarJWT, validateDateMiddleware(['fecha_entrada1', 'fecha_entrada2'])],
     getEntradasSelect
 );
 
-// DELETE - Eliminar entrada
+/**
+ * @swagger
+ * /api/entradas/{id}:
+ *   delete:
+ *     summary: Eliminar entrada
+ *     tags: [Entradas]
+ *     security:
+ *       - xTokenAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Entrada eliminada
+ *       404:
+ *         description: No encontrada
+ */
 router.delete('/:id', validarJWT, deleteEntrada);
 
-// PUT - Actualizar entrada
+/**
+ * @swagger
+ * /api/entradas/{id}:
+ *   put:
+ *     summary: Actualizar entrada completa
+ *     tags: [Entradas]
+ *     security:
+ *       - xTokenAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               empresa:
+ *                 type: string
+ *               nombre_conductor:
+ *                 type: string
+ *               matricula:
+ *                 type: string
+ *               clase_carga:
+ *                 type: string
+ *               fecha_entrada:
+ *                 type: string
+ *                 format: date-time
+ *               fecha_salida:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: Entrada actualizada
+ *       404:
+ *         description: No encontrada
+ */
 router.put(
     '/:id',
     [validarJWT, validateDateMiddleware(['fecha_entrada', 'fecha_salida'])],
