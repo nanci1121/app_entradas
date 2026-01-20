@@ -19,6 +19,10 @@ const swaggerOptions: Options = {
                 description: 'Servidor de Desarrollo (10.192.93.0)'
             },
             {
+                url: 'http://10.192.92.12:7202',
+                description: 'Servidor de Producción (10.192.92.12)'
+            },
+            {
                 url: 'http://localhost:7302',
                 description: 'Localhost (si estás en el servidor)'
             }
