@@ -13,6 +13,8 @@ import { globalErrorHandler, notFoundHandler } from './middelwares/error-handler
 import { logger, captureConsole } from './helpers/logger';
 import { registerSocketHandlers } from './sockets/socket';
 
+import { validarJWT } from './middelwares/validar-jwt';
+
 // Redirigir console.* a logger
 captureConsole();
 
@@ -27,14 +29,16 @@ export const io = new SocketIOServer(server);
 // Registrar manejadores de sockets
 registerSocketHandlers(io);
 
-// 📚 Documentación Swagger/OpenAPI (ANTES de seguridad para evitar bloqueos agresivos)
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+// 📚 Documentación Swagger/OpenAPI (Protegida con JWT)
+// Nota: Los middlewares de seguridad aún no están aplicados, así que validarJWT
+// se ejecuta antes de Helmet/CORS para evitar conflictos con Swagger UI
+app.use('/api-docs', validarJWT, swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     customCss: '.swagger-ui .topbar { display: none }',
     customSiteTitle: "API Entradas - Documentación"
 }));
 
-// Ruta para obtener el JSON de OpenAPI
-app.get('/api-docs.json', (_req: Request, res: Response) => {
+// Ruta para obtener el JSON de OpenAPI (también protegida)
+app.get('/api-docs.json', validarJWT, (_req: Request, res: Response) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);
 });
