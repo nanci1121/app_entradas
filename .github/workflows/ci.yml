@@ -22,7 +22,15 @@ jobs:
       - name: Install dependencies (app)
         working-directory: app
         run: |
-          npm ci --omit=dev || npm install --omit=dev
+          npm ci
+
+      - name: Check Types & Build
+        working-directory: app
+        run: npm run build
+
+      - name: Run Tests
+        working-directory: app
+        run: npm test
 
       - name: Security audit (non-blocking)
         working-directory: app
