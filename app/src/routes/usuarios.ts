@@ -81,12 +81,43 @@ router.get('/users/:id', validarJWT, usuarioId);
  *               properties:
  *                 ok:
  *                   type: boolean
+ *                   example: true
  *                 usuario:
  *                   $ref: '#/components/schemas/Usuario'
  *                 token:
  *                   type: string
+ *                   description: JWT token para autenticación
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       401:
  *         description: Credenciales inválidas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok:
+ *                   type: boolean
+ *                   example: false
+ *                 email:
+ *                   type: string
+ *                 msg:
+ *                   type: string
+ *                   example: la contraseña no es válida
+ *       404:
+ *         description: Usuario no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok:
+ *                   type: boolean
+ *                   example: false
+ *                 email:
+ *                   type: string
+ *                 msg:
+ *                   type: string
+ *                   example: usuario con email X no se encuentra
  */
 router.post('/login', [
     check('email', 'El email es obligatorio').isEmail(),
@@ -155,12 +186,26 @@ router.post('/login/new', [
  *               properties:
  *                 ok:
  *                   type: boolean
+ *                   example: true
  *                 usuario:
  *                   $ref: '#/components/schemas/Usuario'
  *                 token:
  *                   type: string
+ *                   description: Nuevo JWT token
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       401:
  *         description: Token inválido o expirado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok:
+ *                   type: boolean
+ *                   example: false
+ *                 msg:
+ *                   type: string
+ *                   example: Token no válido
  */
 router.get('/login/renew', validarJWT, renewToken);
 
