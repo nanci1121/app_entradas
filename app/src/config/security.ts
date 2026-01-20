@@ -50,7 +50,24 @@ export const createRateLimiter = () => {
 };
 
 export const applySecurityMiddleware = (app: express.Application): void => {
-  app.use(helmet({ crossOriginResourcePolicy: false }));
+  app.use(helmet({
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        baseUri: ["'self'"],
+        fontSrc: ["'self'", "https:", "data:"],
+        formAction: ["'self'"],
+        frameAncestors: ["'self'"],
+        imgSrc: ["'self'", "data:"],
+        objectSrc: ["'none'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        scriptSrcAttr: ["'none'"],
+        styleSrc: ["'self'", "https:", "'unsafe-inline'"],
+      },
+    },
+    hsts: false, // Desactivar Strict-Transport-Security en desarrollo
+  }));
   app.use(cors(createCorsOptions()));
   app.use(pinoHttp({
     logger,

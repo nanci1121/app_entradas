@@ -27,18 +27,7 @@ export const io = new SocketIOServer(server);
 // Registrar manejadores de sockets
 registerSocketHandlers(io);
 
-// Seguridad (Helmet, CORS, rate limiting, logging HTTP)
-applySecurityMiddleware(app);
-
-// Path publico
-const publicPath = path.resolve(__dirname, 'public');
-app.use(express.static(publicPath));
-
-// Lectura y parseo del body
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-// 📚 Documentación Swagger/OpenAPI
+// 📚 Documentación Swagger/OpenAPI (ANTES de seguridad para evitar bloqueos agresivos)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     customCss: '.swagger-ui .topbar { display: none }',
     customSiteTitle: "API Entradas - Documentación"
@@ -49,6 +38,17 @@ app.get('/api-docs.json', (_req: Request, res: Response) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);
 });
+
+// Seguridad (Helmet, CORS, rate limiting, logging HTTP)
+applySecurityMiddleware(app);
+
+// Path publico
+const publicPath = path.resolve(__dirname, 'public');
+app.use(express.static(publicPath));
+
+// Lectura y parseo del body
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 app.get('/', (_req: Request, res: Response) => {
     res.send('Hello World!')
