@@ -1,1 +1,1864 @@
-{"ok":false,"msg":"NO hay token"}
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Servidor App Entradas",
+    "version": "1.0.0",
+    "description": "API para gestión de entradas y salidas de vehículos, personal y empresas externas",
+    "contact": {
+      "name": "Soporte",
+      "email": "soporte@example.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://10.192.93.0:7302",
+      "description": "Servidor de Desarrollo (10.192.93.0)"
+    },
+    {
+      "url": "http://10.192.92.12:7202",
+      "description": "Servidor de Producción (10.192.92.12)"
+    },
+    {
+      "url": "http://localhost:7302",
+      "description": "Localhost (si estás en el servidor)"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "xTokenAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-token",
+        "description": "JWT emitido por /api/login en header x-token"
+      }
+    },
+    "schemas": {
+      "Usuario": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Juan Pérez"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "juan@example.com"
+          },
+          "online": {
+            "type": "boolean",
+            "example": false
+          },
+          "type": {
+            "type": "string",
+            "example": "A"
+          },
+          "codigo_empleado": {
+            "type": "string",
+            "example": "1234"
+          },
+          "date_creation": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "juan@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "password123"
+          }
+        }
+      },
+      "EntradaVehiculo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "empresa": {
+            "type": "string",
+            "example": "Transportes SA"
+          },
+          "nombre_conductor": {
+            "type": "string",
+            "example": "Pedro García"
+          },
+          "matricula": {
+            "type": "string",
+            "example": "ABC-1234"
+          },
+          "clase_carga": {
+            "type": "string",
+            "example": "Material de construcción"
+          },
+          "recepcion": {
+            "type": "boolean",
+            "example": false
+          },
+          "vigilancia": {
+            "type": "boolean",
+            "example": false
+          },
+          "firma": {
+            "type": "string",
+            "description": "Firma del conductor en formato base64",
+            "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+          },
+          "fecha_entrada": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fecha_salida": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "fecha_creacion": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación del registro"
+          }
+        }
+      },
+      "EmpresaExterior": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "nombre_persona": {
+            "type": "string",
+            "example": "Ana López"
+          },
+          "empresa_exterior": {
+            "type": "string",
+            "example": "Consultores XYZ"
+          },
+          "peticionario": {
+            "type": "string",
+            "example": "Dept. RRHH"
+          },
+          "telefono_persona": {
+            "type": "string",
+            "example": "600123456"
+          },
+          "nota": {
+            "type": "string",
+            "example": "Reunión programada"
+          },
+          "recepcion": {
+            "type": "boolean",
+            "example": true
+          },
+          "fecha_entrada": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fecha_salida": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SalidaEmpleado": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "codigo_empleado": {
+            "type": "string",
+            "example": "1234"
+          },
+          "nombre_persona": {
+            "type": "string",
+            "example": "María Rodríguez"
+          },
+          "motivo": {
+            "type": "string",
+            "example": "Cita médica"
+          },
+          "fecha_salida": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fecha_entrada": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SalidaTorno": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "codigo_empleado": {
+            "type": "string",
+            "example": "1234"
+          },
+          "fecha_entrada": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fecha_salida": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": false
+          },
+          "mensaje": {
+            "type": "string",
+            "example": "Descripción del error"
+          },
+          "msg": {
+            "type": "string",
+            "example": "Error en la operación"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "xTokenAuth": []
+    }
+  ],
+  "paths": {
+    "/api/entradas": {
+      "get": {
+        "summary": "Obtener vehículos dentro (últimas 12h o sin salida)",
+        "tags": [
+          "Entradas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de entradas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntradaVehiculo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear nueva entrada de vehículo",
+        "tags": [
+          "Entradas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "empresa",
+                  "matricula",
+                  "fecha_entrada"
+                ],
+                "properties": {
+                  "empresa": {
+                    "type": "string"
+                  },
+                  "nombre_conductor": {
+                    "type": "string"
+                  },
+                  "matricula": {
+                    "type": "string"
+                  },
+                  "clase_carga": {
+                    "type": "string"
+                  },
+                  "fecha_entrada": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "firma": {
+                    "type": "string",
+                    "description": "Firma del conductor en formato base64"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Entrada creada"
+          },
+          "400": {
+            "description": "Datos inválidos"
+          }
+        }
+      }
+    },
+    "/api/entradas/almacen": {
+      "get": {
+        "summary": "Obtener entradas para almacén",
+        "tags": [
+          "Entradas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entradas para almacén"
+          }
+        }
+      }
+    },
+    "/api/entradas/porteria": {
+      "get": {
+        "summary": "Obtener entradas para portería",
+        "tags": [
+          "Entradas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entradas para portería"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar entrada en portería",
+        "tags": [
+          "Entradas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "fecha": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "vigilancia": {
+                    "type": "boolean",
+                    "description": "Estado de vigilancia (true para marcar salida)"
+                  }
+                },
+                "required": [
+                  "id",
+                  "vigilancia",
+                  "fecha"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entrada actualizada"
+          }
+        }
+      }
+    },
+    "/api/entradas/by-matricula/{matricula}": {
+      "get": {
+        "summary": "Buscar entrada por matrícula",
+        "tags": [
+          "Entradas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "matricula",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Matrícula del vehículo"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entrada encontrada"
+          },
+          "404": {
+            "description": "No encontrada"
+          }
+        }
+      }
+    },
+    "/api/entradas/{id}": {
+      "get": {
+        "summary": "Obtener entrada específica por ID",
+        "tags": [
+          "Entradas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID de la entrada"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entrada encontrada"
+          },
+          "404": {
+            "description": "No encontrada"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar entrada",
+        "tags": [
+          "Entradas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entrada eliminada"
+          },
+          "404": {
+            "description": "No encontrada"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar entrada completa",
+        "tags": [
+          "Entradas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "empresa": {
+                    "type": "string"
+                  },
+                  "nombre_conductor": {
+                    "type": "string"
+                  },
+                  "matricula": {
+                    "type": "string"
+                  },
+                  "clase_carga": {
+                    "type": "string"
+                  },
+                  "fecha_entrada": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "fecha_salida": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "firma": {
+                    "type": "string",
+                    "description": "Firma del conductor en formato base64"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entrada actualizada"
+          },
+          "404": {
+            "description": "No encontrada"
+          }
+        }
+      }
+    },
+    "/api/entradas/recepcion": {
+      "put": {
+        "summary": "Actualizar estado de recepción",
+        "tags": [
+          "Entradas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "recepcion": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estado actualizado"
+          }
+        }
+      }
+    },
+    "/api/entradas/select": {
+      "put": {
+        "summary": "Consultar entradas por rango de fechas",
+        "tags": [
+          "Entradas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "fecha_entrada1",
+                  "fecha_entrada2"
+                ],
+                "properties": {
+                  "fecha_entrada1": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "fecha_entrada2": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lista filtrada de entradas"
+          }
+        }
+      }
+    },
+    "/api/externas/new_externa": {
+      "post": {
+        "summary": "Crear nueva entrada de empresa externa",
+        "tags": [
+          "Externas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nombre_persona",
+                  "empresa_exterior"
+                ],
+                "properties": {
+                  "nombre_persona": {
+                    "type": "string"
+                  },
+                  "empresa_exterior": {
+                    "type": "string"
+                  },
+                  "peticionario": {
+                    "type": "string"
+                  },
+                  "telefono_persona": {
+                    "type": "string"
+                  },
+                  "nota": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Externa creada"
+          }
+        }
+      }
+    },
+    "/api/externas/externas_hoy": {
+      "get": {
+        "summary": "Obtener externas registradas hoy",
+        "tags": [
+          "Externas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de externas de hoy"
+          }
+        }
+      }
+    },
+    "/api/externas/porteria": {
+      "get": {
+        "summary": "Obtener externas en portería",
+        "tags": [
+          "Externas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Externas en portería"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar estado en portería",
+        "tags": [
+          "Externas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "recepcion": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estado actualizado"
+          }
+        }
+      }
+    },
+    "/api/externas/{id}": {
+      "get": {
+        "summary": "Obtener externa específica por ID",
+        "tags": [
+          "Externas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Externa encontrada"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar externa",
+        "tags": [
+          "Externas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre_persona": {
+                    "type": "string"
+                  },
+                  "empresa_exterior": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Externa actualizada"
+          }
+        }
+      }
+    },
+    "/api/externas/externa/{id}": {
+      "delete": {
+        "summary": "Eliminar externa",
+        "tags": [
+          "Externas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Externa eliminada"
+          }
+        }
+      }
+    },
+    "/api/externas/buscar_externa": {
+      "put": {
+        "summary": "Buscar externas por rango de fechas",
+        "tags": [
+          "Externas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "fechaEntrada",
+                  "fechaEntrada2"
+                ],
+                "properties": {
+                  "fechaEntrada": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "fechaEntrada2": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lista filtrada"
+          }
+        }
+      }
+    },
+    "/api/externas/by-nombreConductor/{nombreConductor}": {
+      "get": {
+        "summary": "Buscar externa por nombre de conductor",
+        "tags": [
+          "Externas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "nombreConductor",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Externa encontrada"
+          }
+        }
+      }
+    },
+    "/api/internas/new_Interna": {
+      "post": {
+        "summary": "Crear nueva salida de empleado (interna)",
+        "tags": [
+          "Internas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "codigo_empleado",
+                  "nombre_persona",
+                  "fechaSalida"
+                ],
+                "properties": {
+                  "codigo_empleado": {
+                    "type": "string"
+                  },
+                  "nombre_persona": {
+                    "type": "string"
+                  },
+                  "motivo": {
+                    "type": "string"
+                  },
+                  "fechaSalida": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Interna creada"
+          }
+        }
+      }
+    },
+    "/api/internas/internas_hoy": {
+      "get": {
+        "summary": "Obtener salidas internas registradas hoy",
+        "tags": [
+          "Internas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de internas de hoy"
+          }
+        }
+      }
+    },
+    "/api/internas/{id}": {
+      "get": {
+        "summary": "Obtener interna específica por ID",
+        "tags": [
+          "Internas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interna encontrada"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar interna completa",
+        "tags": [
+          "Internas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fechaEntrada": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "fechaSalida": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interna actualizada"
+          }
+        }
+      }
+    },
+    "/api/internas/code": {
+      "post": {
+        "summary": "Obtener interna por código de empleado",
+        "tags": [
+          "Internas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "codigo_empleado": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interna encontrada"
+          }
+        }
+      }
+    },
+    "/api/internas/porteria": {
+      "put": {
+        "summary": "Actualizar entrada de retorno en portería",
+        "tags": [
+          "Internas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "fechaEntrada": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interna actualizada"
+          }
+        }
+      }
+    },
+    "/api/internas/interna/{id}": {
+      "delete": {
+        "summary": "Eliminar interna",
+        "tags": [
+          "Internas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interna eliminada"
+          }
+        }
+      }
+    },
+    "/api/internas/buscar_interna": {
+      "put": {
+        "summary": "Buscar internas por rango de fechas",
+        "tags": [
+          "Internas"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "fechaSalida",
+                  "fechaSalida2"
+                ],
+                "properties": {
+                  "fechaSalida": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "fechaSalida2": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lista filtrada"
+          }
+        }
+      }
+    },
+    "/api/tornos/setTorno": {
+      "post": {
+        "summary": "Crear registro de torno (entrada/salida de empleado por torniquete)",
+        "tags": [
+          "Tornos"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "codigo_empleado"
+                ],
+                "properties": {
+                  "codigo_empleado": {
+                    "type": "string"
+                  },
+                  "fechaEntrada": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "fechaSalida": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Registro de torno creado"
+          }
+        }
+      }
+    },
+    "/api/tornos/tornos_hoy": {
+      "get": {
+        "summary": "Obtener registros de tornos de hoy",
+        "tags": [
+          "Tornos"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de tornos de hoy"
+          }
+        }
+      }
+    },
+    "/api/tornos/{id}": {
+      "get": {
+        "summary": "Obtener torno específico por ID",
+        "tags": [
+          "Tornos"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Torno encontrado"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar registro de torno",
+        "tags": [
+          "Tornos"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Torno eliminado"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar registro de torno",
+        "tags": [
+          "Tornos"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fechaEntrada": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "fechaSalida": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Torno actualizado"
+          }
+        }
+      }
+    },
+    "/api/tornos/code": {
+      "post": {
+        "summary": "Obtener torno por código de empleado",
+        "tags": [
+          "Tornos"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "codigo_empleado": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Torno encontrado"
+          }
+        }
+      }
+    },
+    "/api/tornos/consulta": {
+      "post": {
+        "summary": "Consultar tornos por rango de fechas",
+        "tags": [
+          "Tornos"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "fechaInicio",
+                  "fechaFin"
+                ],
+                "properties": {
+                  "fechaInicio": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "fechaFin": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lista filtrada de tornos"
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "summary": "Obtener todos los usuarios",
+        "tags": [
+          "Usuarios"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Usuario"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "summary": "Obtener usuario específico por ID",
+        "tags": [
+          "Usuarios"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuario encontrado"
+          },
+          "404": {
+            "description": "Usuario no encontrado"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar usuario",
+        "tags": [
+          "Usuarios"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "codigo_empleado": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario actualizado"
+          },
+          "404": {
+            "description": "Usuario no encontrado"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar usuario",
+        "tags": [
+          "Usuarios"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuario eliminado"
+          },
+          "404": {
+            "description": "Usuario no encontrado"
+          }
+        }
+      }
+    },
+    "/api/login": {
+      "post": {
+        "summary": "Autenticar usuario",
+        "tags": [
+          "Usuarios"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login exitoso, devuelve token JWT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "usuario": {
+                      "$ref": "#/components/schemas/Usuario"
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "JWT token para autenticación",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales inválidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "la contraseña no es válida"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "usuario con email X no se encuentra"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login/new": {
+      "post": {
+        "summary": "Crear nuevo usuario",
+        "tags": [
+          "Usuarios"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Juan Pérez"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "juan@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "example": 123456
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "Tipo de usuario (admin/user)",
+                    "example": "user"
+                  },
+                  "codigo_empleado": {
+                    "type": "string",
+                    "description": "Código de empleado único",
+                    "example": "4321"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario creado exitosamente, devuelve token y datos del usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "usuario": {
+                      "$ref": "#/components/schemas/Usuario"
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "JWT token para autenticación inmediata",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email ya existe o datos inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "Usuario con email: juan@example.com ya existe no se puede insertar"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login/renew": {
+      "get": {
+        "summary": "Renovar token JWT",
+        "tags": [
+          "Usuarios"
+        ],
+        "security": [
+          {
+            "xTokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token renovado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "usuario": {
+                      "$ref": "#/components/schemas/Usuario"
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "Nuevo JWT token",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido o expirado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "Token no válido"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}

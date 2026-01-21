@@ -140,6 +140,9 @@ router.get('/:id', validarJWT, getEntrada);
  *                 type: string
  *               clase_carga:
  *                 type: string
+ *               firma:
+ *                 type: string
+ *                 description: Firma del conductor en formato base64
  *               fecha_entrada:
  *                 type: string
  *                 format: date-time
@@ -194,9 +197,16 @@ router.put('/recepcion', validarJWT, updateRecepcionEntrada);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - id
+ *               - vigilancia
+ *               - fecha
  *             properties:
  *               id:
  *                 type: integer
+ *               vigilancia:
+ *                 type: boolean
+ *                 description: Estado de vigilancia (true para marcar salida)
  *               fecha:
  *                 type: string
  *                 format: date-time
@@ -295,6 +305,9 @@ router.delete('/:id', validarJWT, deleteEntrada);
  *                 type: string
  *               clase_carga:
  *                 type: string
+ *               firma:
+ *                 type: string
+ *                 description: Firma del conductor en formato base64
  *               fecha_entrada:
  *                 type: string
  *                 format: date-time

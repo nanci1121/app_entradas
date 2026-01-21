@@ -67,8 +67,18 @@ const swaggerOptions: Options = {
                         clase_carga: { type: 'string', example: 'Material de construcción' },
                         recepcion: { type: 'boolean', example: false },
                         vigilancia: { type: 'boolean', example: false },
+                        firma: {
+                            type: 'string',
+                            description: 'Firma del conductor en formato base64',
+                            example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...'
+                        },
                         fecha_entrada: { type: 'string', format: 'date-time' },
-                        fecha_salida: { type: 'string', format: 'date-time' }
+                        fecha_salida: { type: 'string', format: 'date-time', nullable: true },
+                        fecha_creacion: {
+                            type: 'string',
+                            format: 'date-time',
+                            description: 'Fecha de creación del registro'
+                        }
                     }
                 },
                 EmpresaExterior: {
