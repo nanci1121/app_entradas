@@ -29,16 +29,14 @@ export const io = new SocketIOServer(server);
 // Registrar manejadores de sockets
 registerSocketHandlers(io);
 
-// 📚 Documentación Swagger/OpenAPI (Protegida con JWT)
-// Nota: Los middlewares de seguridad aún no están aplicados, así que validarJWT
-// se ejecuta antes de Helmet/CORS para evitar conflictos con Swagger UI
-app.use('/api-docs', validarJWT, swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+// 📚 Documentación Swagger/OpenAPI (Pública)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     customCss: '.swagger-ui .topbar { display: none }',
     customSiteTitle: "API Entradas - Documentación"
 }));
 
-// Ruta para obtener el JSON de OpenAPI (también protegida)
-app.get('/api-docs.json', validarJWT, (_req: Request, res: Response) => {
+// Ruta para obtener el JSON de OpenAPI (Pública)
+app.get('/api-docs.json', (_req: Request, res: Response) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);
 });

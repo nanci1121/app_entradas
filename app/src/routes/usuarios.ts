@@ -145,21 +145,55 @@ router.post('/login', [
  *             properties:
  *               name:
  *                 type: string
+ *                 example: Juan Pérez
  *               email:
  *                 type: string
  *                 format: email
+ *                 example: juan@example.com
  *               password:
  *                 type: string
  *                 format: password
+ *                 example: 123456
  *               type:
  *                 type: string
+ *                 description: Tipo de usuario (admin/user)
+ *                 example: user
  *               codigo_empleado:
  *                 type: string
+ *                 description: Código de empleado único
+ *                 example: "4321"
  *     responses:
- *       201:
- *         description: Usuario creado exitosamente
+ *       200:
+ *         description: Usuario creado exitosamente, devuelve token y datos del usuario
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok:
+ *                   type: boolean
+ *                   example: true
+ *                 usuario:
+ *                   $ref: '#/components/schemas/Usuario'
+ *                 token:
+ *                   type: string
+ *                   description: JWT token para autenticación inmediata
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       400:
  *         description: Email ya existe o datos inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok:
+ *                   type: boolean
+ *                   example: false
+ *                 email:
+ *                   type: string
+ *                 msg:
+ *                   type: string
+ *                   example: "Usuario con email: juan@example.com ya existe no se puede insertar"
  */
 router.post('/login/new', [
     check('name', 'El nombre es obligatorio').not().isEmpty(),
