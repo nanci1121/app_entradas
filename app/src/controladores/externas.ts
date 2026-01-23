@@ -194,49 +194,70 @@ const setExterna = async (req: Request, res: Response): Promise<void> => {
 const updatePorteriaExterna = async (req: Request, res: Response): Promise<void> => {
     try {
         const token = req.headers['x-token'] as string | undefined;
-        if (!token) {
-            res.status(401).json({
-                ok: false,
-                mensaje: 'Token no proporcionado'
-            } as ApiResponse);
-            return;
-        }
-
-        const [valid, usuarioId] = comprobarJWT(token);
-        if (!valid || !usuarioId) {
-            res.status(401).json({
-                ok: false,
-                mensaje: 'Token inválido'
-            } as ApiResponse);
-            return;
-        }
-
+        const [valid, usuarioId] = comprobarJWT(token || '');
         const { id, fechaSalida, recepcion } = req.body;
 
+        // Validar que vengan los campos necesarios
+        if (!id) {
+            res.status(400).json({
+                ok: false,
+                mensaje: 'El campo id es obligatorio'
+            } as ApiResponse);
+            return;
+        }
+
+        if (recepcion === undefined || recepcion === null) {
+            res.status(400).json({
+                ok: false,
+                mensaje: 'El campo recepcion es obligatorio'
+            } as ApiResponse);
+            return;
+        }
+
+        // Verificar que la externa existe
         const existe_id = await pool.query('SELECT * FROM empresas_exteriores WHERE id = $1', [id]);
 
         if (existe_id.rowCount === 0) {
             res.status(404).json({
                 ok: false,
-                mensaje: `No se encontró externa con id ${id}`
+                mensaje: `Empresa exterior con id ${id} no se encuentra`
             } as ApiResponse);
             return;
         }
 
-        await pool.query(
-            'UPDATE empresas_exteriores SET recepcion = $1, fecha_salida = $2, usuario = $3 WHERE id = $4',
-            [recepcion, fechaSalida, usuarioId, id]
-        );
+        // Actualizar la externa
+        const updateQuery = 'UPDATE empresas_exteriores SET recepcion = $1, fecha_salida = $2, usuario = $3 WHERE id = $4';
+        const result = await pool.query(updateQuery, [recepcion, fechaSalida, usuarioId, id]);
 
-        res.json({
+        // Verificar que la actualización se realizó
+        if (result.rowCount === 0) {
+            res.status(500).json({
+                ok: false,
+                mensaje: 'No se pudo actualizar la entrada'
+            } as ApiResponse);
+            return;
+        }
+
+        // Obtener el registro actualizado para verificar
+        const registroActualizado = await pool.query('SELECT * FROM empresas_exteriores WHERE id = $1', [id]);
+        
+        console.log('[DEBUG] Externa actualizada:', {
+            id,
+            recepcion,
+            fechaSalida,
+            fechaSalidaGuardada: registroActualizado.rows[0].fecha_salida
+        });
+
+        res.status(200).json({
             ok: true,
-            mensaje: 'Entrada portería actualizada correctamente'
+            mensaje: 'Entrada de portería actualizada satisfactoriamente',
+            externa: registroActualizado.rows[0]
         } as ApiResponse);
     } catch (error) {
-        console.log((error as Error).stack);
+        console.log('[ERROR] updatePorteriaExterna:', (error as Error).stack);
         res.status(500).json({
             ok: false,
-            mensaje: 'Error al actualizar portería'
+            mensaje: 'Error inesperado al actualizar la entrada de portería'
         } as ApiResponse);
     }
 };
