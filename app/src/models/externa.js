@@ -26,9 +26,10 @@ module.exports = class Externa {
         externa.peticionario = body.peticionario;
         externa.telefonoPersona = body.telefono_persona || body.telefonoPersona;
         externa.fechaEntrada = body.fecha_entrada || body.fechaEntrada;
-        externa.fechaSalida = body.fecha_entrada2 || body.fechaSalida;
+        externa.fechaSalida = body.fecha_entrada2 || body.fecha_salida || body.fechaSalida;
         externa.firma = body.firma;
         externa.nota = body.nota;
+        externa.recepcion = body.recepcion;
         return externa;
     }
 };

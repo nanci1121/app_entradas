@@ -1,5 +1,52 @@
 # Changelog del Contrato OpenAPI
 
+## Fecha: 2026-01-23
+
+### Cambios Realizados
+
+#### 1. Endpoint `PUT /api/externas/porteria` Corregido y Actualizado
+
+**Problema identificado y corregido:**
+- La función `updatePorteriaExterna` no guardaba correctamente la `fecha_salida` en la base de datos
+- Faltaban validaciones de campos requeridos
+- Respuesta era texto plano en lugar de JSON
+- No se verificaba que la actualización se ejecutara correctamente
+
+**Cambios en el código:**
+- ✅ Agregadas validaciones para campos `id` y `recepcion` (obligatorios)
+- ✅ Verificación de existencia del registro (404 si no existe)
+- ✅ Verificación de éxito de actualización
+- ✅ Respuesta JSON estándar con estructura `{ok, mensaje, externa}`
+- ✅ Logging de debug para troubleshooting
+- ✅ Modelo `Externa.fromRequest` actualizado para mapear `recepcion` y `fecha_salida`
+
+**Cambios en documentación OpenAPI:**
+- Campo `fechaSalida` ahora documentado en el schema de request
+- Campos marcados como `required: ["id", "recepcion"]`
+- Respuestas completas documentadas: 200, 400, 404, 500
+- Descripción mejorada con ejemplos
+- Estructura de respuesta JSON definida
+
+**Request Body actualizado:**
+```json
+{
+  "id": 123,
+  "fechaSalida": "2026-01-23 11:30:00",
+  "recepcion": true
+}
+```
+
+**Response 200 actualizada:**
+```json
+{
+  "ok": true,
+  "mensaje": "Entrada de portería actualizada satisfactoriamente",
+  "externa": { ...objeto_completo... }
+}
+```
+
+---
+
 ## Fecha: 2026-01-21
 
 ### Cambios Realizados

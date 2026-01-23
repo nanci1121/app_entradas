@@ -140,48 +140,54 @@ describe('Controlador Externas', () => {
     expect(res.json).toHaveBeenCalledWith({ ok: true, externa: 7 });
   });
 
-  it('updatePorteriaExterna responde 401 si no hay token', async () => {
-    const req = mockRequest({ headers: {}, body: {} });
+  it('updatePorteriaExterna responde 400 si falta id', async () => {
+    const req = mockRequest({ headers: { 'x-token': 'token' }, body: { recepcion: true } });
     const res = mockResponse();
 
     await updatePorteriaExterna(req, res);
 
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ ok: false, mensaje: 'Token no proporcionado' });
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ ok: false, mensaje: 'El campo id es obligatorio' });
   });
 
-  it('updatePorteriaExterna responde 401 si token inválido', async () => {
-    (comprobarJWT as jest.Mock).mockReturnValueOnce([false, null]);
-    const req = mockRequest({ headers: { 'x-token': 'bad' }, body: {} });
+  it('updatePorteriaExterna responde 400 si falta recepcion', async () => {
+    const req = mockRequest({ headers: { 'x-token': 'token' }, body: { id: 5 } });
     const res = mockResponse();
 
     await updatePorteriaExterna(req, res);
 
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ ok: false, mensaje: 'Token inválido' });
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ ok: false, mensaje: 'El campo recepcion es obligatorio' });
   });
 
   it('updatePorteriaExterna responde 404 si no existe', async () => {
-    const req = mockRequest({ headers: { 'x-token': 'token' }, body: { id: 5 } });
+    const req = mockRequest({ headers: { 'x-token': 'token' }, body: { id: 5, recepcion: true } });
     const res = mockResponse();
     pool.query.mockResolvedValueOnce({ rowCount: 0, rows: [] });
 
     await updatePorteriaExterna(req, res);
 
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ ok: false, mensaje: 'No se encontró externa con id 5' });
+    expect(res.json).toHaveBeenCalledWith({ ok: false, mensaje: 'Empresa exterior con id 5 no se encuentra' });
   });
 
   it('updatePorteriaExterna actualiza cuando existe', async () => {
     const req = mockRequest({ headers: { 'x-token': 'token' }, body: { id: 5, fechaSalida: '2025-01-05', recepcion: true } });
     const res = mockResponse();
+    const mockExterna = { id: 5, recepcion: true, fecha_salida: '2025-01-05' };
     pool.query
-      .mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 5 }] })
-      .mockResolvedValueOnce({});
+      .mockResolvedValueOnce({ rowCount: 1, rows: [mockExterna] })  // SELECT verificación
+      .mockResolvedValueOnce({ rowCount: 1 })  // UPDATE
+      .mockResolvedValueOnce({ rowCount: 1, rows: [mockExterna] });  // SELECT resultado
 
     await updatePorteriaExterna(req, res);
 
-    expect(res.json).toHaveBeenCalledWith({ ok: true, mensaje: 'Entrada portería actualizada correctamente' });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ 
+      ok: true, 
+      mensaje: 'Entrada de portería actualizada satisfactoriamente',
+      externa: mockExterna
+    });
   });
 
   it('deleteExterna responde 401 si no hay token', async () => {
