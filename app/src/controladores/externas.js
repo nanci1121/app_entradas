@@ -148,26 +148,73 @@ const setExterna = async (req, res = response) => {
  * @description Actualiza el estado de recepción de una entrada de empresa externa.
  * @param {object} req - El objeto de solicitud de Express. El body debe contener: id, fechaSalida, recepcion.
  * @param {object} res - El objeto de respuesta de Express.
- * @returns {string} Un mensaje de texto confirmando la actualización.
+ * @returns {object} Un objeto JSON con el resultado de la operación.
  */
 const updatePorteriaExterna = async (req, res = response) => {
-
-
     try {
-
         const token = req.headers['x-token'];
         const usuario_id = comprobarJWT(token);
         const id_usuaio = usuario_id[1];
         const { id, fechaSalida, recepcion } = req.body;
 
-        const existe_id = await pool.query('SELECT * FROM empresas_exteriores WHERE id = $1 ORDER BY fecha_entrada ASC', [id]);
-
-        if (existe_id.rowCount == 1) {
-            const response = await pool.query('UPDATE empresas_exteriores SET recepcion = $1, fecha_salida = $2, usuario = $3 WHERE id = $4', [recepcion, fechaSalida, id_usuaio, id]);
-            res.json('Entrada Porteria Updated Successfully');
+        // Validar que vengan los campos necesarios
+        if (!id) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'El campo id es obligatorio'
+            });
         }
+
+        if (recepcion === undefined || recepcion === null) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'El campo recepcion es obligatorio'
+            });
+        }
+
+        // Verificar que la externa existe
+        const existe_id = await pool.query('SELECT * FROM empresas_exteriores WHERE id = $1', [id]);
+
+        if (existe_id.rowCount === 0) {
+            return res.status(404).json({
+                ok: false,
+                mensaje: `Empresa exterior con id ${id} no se encuentra`
+            });
+        }
+
+        // Actualizar la externa
+        const updateQuery = 'UPDATE empresas_exteriores SET recepcion = $1, fecha_salida = $2, usuario = $3 WHERE id = $4';
+        const result = await pool.query(updateQuery, [recepcion, fechaSalida, id_usuaio, id]);
+
+        // Verificar que la actualización se realizó
+        if (result.rowCount === 0) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'No se pudo actualizar la entrada'
+            });
+        }
+
+        // Obtener el registro actualizado para verificar
+        const registroActualizado = await pool.query('SELECT * FROM empresas_exteriores WHERE id = $1', [id]);
+        
+        console.log('[DEBUG] Externa actualizada:', {
+            id,
+            recepcion,
+            fechaSalida,
+            fechaSalidaGuardada: registroActualizado.rows[0].fecha_salida
+        });
+
+        res.status(200).json({
+            ok: true,
+            mensaje: 'Entrada de portería actualizada satisfactoriamente',
+            externa: registroActualizado.rows[0]
+        });
     } catch (error) {
-        console.log(error.stack)
+        console.log('[ERROR] updatePorteriaExterna:', error.stack);
+        res.status(500).json({
+            ok: false,
+            mensaje: 'Error inesperado al actualizar la entrada de portería'
+        });
     }
 };
 

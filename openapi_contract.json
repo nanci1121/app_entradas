@@ -740,6 +740,7 @@
       },
       "put": {
         "summary": "Actualizar estado en portería",
+        "description": "Actualiza el estado de recepción y fecha de salida de una externa desde portería. Cuando recepcion=true, la externa desaparece de la lista de portería.",
         "tags": [
           "Externas"
         ],
@@ -754,12 +755,23 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["id", "recepcion"],
                 "properties": {
                   "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "ID de la externa a actualizar",
+                    "example": 123
+                  },
+                  "fechaSalida": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha y hora de salida (formato: YYYY-MM-DD HH:mm:ss)",
+                    "example": "2026-01-23 11:30:00"
                   },
                   "recepcion": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Estado de recepción (true = cerrada, false = pendiente)",
+                    "example": true
                   }
                 }
               }
@@ -768,7 +780,88 @@
         },
         "responses": {
           "200": {
-            "description": "Estado actualizado"
+            "description": "Entrada de portería actualizada satisfactoriamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "mensaje": {
+                      "type": "string",
+                      "example": "Entrada de portería actualizada satisfactoriamente"
+                    },
+                    "externa": {
+                      "type": "object",
+                      "description": "Objeto externa actualizado con todos sus campos"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error de validación - Falta campo requerido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "mensaje": {
+                      "type": "string",
+                      "example": "El campo id es obligatorio"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Externa no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "mensaje": {
+                      "type": "string",
+                      "example": "Empresa exterior con id 123 no se encuentra"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "mensaje": {
+                      "type": "string",
+                      "example": "Error inesperado al actualizar la entrada de portería"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
