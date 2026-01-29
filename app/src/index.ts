@@ -57,11 +57,11 @@ app.get('/', (_req: Request, res: Response) => {
 });
 
 // Mis rutas
-app.use('/api/', require('./routes/usuarios'));
-app.use('/api/entradas', require('./routes/entradas'));
-app.use('/api/externas', require('./routes/externas'));
-app.use('/api/internas', require('./routes/internas'));
-app.use('/api/tornos', require('./routes/tornos'));
+app.use('/api/', require('./routes/usuarios').default);
+app.use('/api/entradas', require('./routes/entradas').default);
+app.use('/api/externas', require('./routes/externas').default);
+app.use('/api/internas', require('./routes/internas').default);
+app.use('/api/tornos', require('./routes/tornos').default);
 
 // 🟢 Ruta de salud (para ver si el servidor responde)
 app.get('/api/ping', (_req: Request, res: Response) => {

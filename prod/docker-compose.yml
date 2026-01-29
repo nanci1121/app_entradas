@@ -13,7 +13,7 @@ services:
     volumes:
       - local_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL","pg_isready -U vmv"]
+      test: [ "CMD-SHELL", "PGSSLMODE=disable pg_isready -U vmv -d firstapi" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -52,16 +52,16 @@ services:
       - PGPASSWORD=${POSTGRES_PASSWORD}
       - PGPORT=5432
       - JWT_KEY=${JWT_KEY}
-    volumes:
-      - ../app:/app
-      - /app/node_modules
+    # volumes:
+    #   - ../app:/app
+    #   - /app/node_modules
     depends_on:
       db:
         condition: service_healthy
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/ping || exit 1"]
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:3000/api/ping || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -72,12 +72,10 @@ services:
         max-size: "10m"
         max-file: "3"
 
-
-
-
 volumes:
   local_pgdata:
   pgadmin-data:
+
 
 networks:
   app-network:
