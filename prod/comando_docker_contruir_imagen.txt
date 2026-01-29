@@ -1,2 +1,9 @@
+# 1. Construir la imagen optimizada para producción con el tag 'srv_alpine:prod'
+# Ejecutar desde la raíz del proyecto
 docker build -t srv_alpine:prod -f prod/Dockerfile app
-docker compose -f prod/docker-compose.yml --env-file .env up -d
+
+# 2. (Opcional) Si necesitas enviarla a otro servidor:
+# docker save srv_alpine:prod | gzip > srv_alpine_prod_$(date +%Y%m%d).tar.gz
+
+# 3. Levantar los servicios en el servidor de destino
+docker compose -f prod/docker-compose.yml --env-file prod/.env up -d
