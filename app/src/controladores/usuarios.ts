@@ -139,7 +139,11 @@ const login = async (req: Request, res: Response): Promise<void> => {
  */
 const createUsuario = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name, email, password, type = 'user', codigo_empleado } = req.body;
+        const name = req.body.name;
+        const email = req.body.email;
+        const password = req.body.password;
+        const type = req.body.type ?? 'user';
+        const codigo_empleado = req.body.codigo_empleado ?? req.body.codigoEmpleado;
 
         // Verificar si email ya existe
         const existemail = await pool.query('SELECT email FROM users WHERE email = $1', [email]);
@@ -194,7 +198,11 @@ const createUsuario = async (req: Request, res: Response): Promise<void> => {
 const updateUsuario = async (req: Request, res: Response): Promise<void> => {
     try {
         const id: number = parseInt(req.params.id, 10);
-        const { name, email, password, type, codigo_empleado } = req.body;
+        const name = req.body.name;
+        const email = req.body.email;
+        const password = req.body.password;
+        const type = req.body.type;
+        const codigo_empleado = req.body.codigo_empleado ?? req.body.codigoEmpleado;
 
         console.log('este es el codigo de empleado', codigo_empleado);
 

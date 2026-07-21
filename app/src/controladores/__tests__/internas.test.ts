@@ -128,6 +128,24 @@ describe('Controlador Internas', () => {
     expect(res.json).toHaveBeenCalledWith({ ok: true, interna: 10 });
   });
 
+  it('setInterna crea cuando datos válidos con snake_case', async () => {
+    const res = mockResponse();
+    pool.query
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ rows: [{ id: 10 }] });
+
+    await setInterna(
+      mockRequest({
+        headers: { 'x-token': 'token' },
+        body: { codigo_empleado: '123', nombre_persona: 'Ana', fecha_salida: '2025-01-05', motivo: 'X' },
+      }),
+      res
+    );
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ ok: true, interna: 10 });
+  });
+
   it('updatePorteriaInterna responde 401 si no hay token', async () => {
     const res = mockResponse();
 
@@ -260,6 +278,30 @@ describe('Controlador Internas', () => {
           nombre_persona: 'Ana',
           fecha_entrada: '2025-01-05',
           fecha_salida: '2025-01-06',
+          motivo: 'X',
+        },
+      }),
+      res
+    );
+
+    expect(res.json).toHaveBeenCalledWith({ ok: true, mensaje: 'Registro 6 modificado satisfactoriamente' });
+  });
+
+  it('updateInternas actualiza cuando existe usando camelCase', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 6 }] })
+      .mockResolvedValueOnce({});
+    const res = mockResponse();
+
+    await updateInternas(
+      mockRequest({
+        params: { id: '6' },
+        headers: { 'x-token': 'token' },
+        body: {
+          codigoEmpleado: '123',
+          nombrePersona: 'Ana',
+          fechaEntrada: '2025-01-05',
+          fechaSalida: '2025-01-06',
           motivo: 'X',
         },
       }),

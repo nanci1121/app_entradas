@@ -153,6 +153,24 @@ describe('Controlador Tornos', () => {
     expect(res.json).toHaveBeenCalledWith({ ok: true, torno_id: 9, mensaje: 'Registro de torno creado correctamente' });
   });
 
+  it('setTorno crea cuando datos válidos con snake_case', async () => {
+    const res = mockResponse();
+    pool.query
+      .mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 1 }] })
+      .mockResolvedValueOnce({ rows: [{ id: 9 }] });
+
+    await setTorno(
+      mockRequest({
+        headers: { 'x-token': 'token' },
+        body: { codigo_empleado: '1', fecha_entrada: '2025-01-05', fecha_salida: '2025-01-06' },
+      }),
+      res
+    );
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ ok: true, torno_id: 9, mensaje: 'Registro de torno creado correctamente' });
+  });
+
   it('getTornoCode retorna 404 si no existe', async () => {
     pool.query.mockResolvedValueOnce({ rowCount: 0, rows: [] });
     const res = mockResponse();

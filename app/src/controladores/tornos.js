@@ -158,7 +158,9 @@ const setTorno = async (req, res = response) => {
         
 
         // Las fechas ya han sido validadas por el middleware
-        const { codigoEmpleado, fechaSalida, fechaEntrada } = req.body;
+        const codigoEmpleado = req.body.codigoEmpleado || req.body.codigo_empleado;
+        const fechaSalida = req.body.fechaSalida || req.body.fecha_salida;
+        const fechaEntrada = req.body.fechaEntrada || req.body.fecha_entrada;
 
         if (!codigoEmpleado || (!fechaEntrada && !fechaSalida)) {
             return res.status(400).json({
@@ -221,7 +223,9 @@ const updateTorno = async (req, res = response) => {
             return res.status(401).json({ ok: false, mensaje: 'Token no válido o expirado.' });
         }
 
-        const { codigoEmpleado, fechaEntrada, fechaSalida } = req.body;
+        const codigoEmpleado = req.body.codigoEmpleado || req.body.codigo_empleado;
+        const fechaEntrada = req.body.fechaEntrada || req.body.fecha_entrada;
+        const fechaSalida = req.body.fechaSalida || req.body.fecha_salida;
 
         if (!codigoEmpleado && fechaEntrada === undefined && fechaSalida === undefined) {
             return res.status(400).json({

@@ -13,12 +13,12 @@ services:
     volumes:
       - local_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -h 127.0.0.1 -U vmv" ]
+      test: [ "CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${POSTGRES_USER}" ]
       interval: 10s
       timeout: 5s
       retries: 5
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:5435:5432"
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -31,7 +31,7 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     ports:
-      - "127.0.0.1:7301:80"
+      - "127.0.0.1:7303:80"
     networks:
       - app-network
     depends_on:
@@ -39,9 +39,12 @@ services:
         condition: service_healthy
 
   app:
+    build:
+      context: ../app
+      dockerfile: ../dev/Dockerfile.dev
     image: srv_alpine:dev
     restart: unless-stopped
-    command: npm run dev:simple
+    command: npm run dev:nodemon
     ports:
       - "7302:3000"
     env_file:

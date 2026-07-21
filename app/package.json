@@ -7,6 +7,7 @@
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only --poll src/index.ts",
     "dev:simple": "ts-node src/index.ts",
+    "dev:nodemon": "nodemon -L --watch src --ext ts --exec ts-node src/index.ts",
     "build": "tsc",
     "dev:js": "nodemon src/index.js",
     "test": "jest",

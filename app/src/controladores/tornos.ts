@@ -167,7 +167,9 @@ const setTorno = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        const { codigoEmpleado, fechaSalida, fechaEntrada } = req.body;
+        const codigoEmpleado = req.body.codigoEmpleado ?? req.body.codigo_empleado;
+        const fechaSalida = req.body.fechaSalida ?? req.body.fecha_salida;
+        const fechaEntrada = req.body.fechaEntrada ?? req.body.fecha_entrada;
 
         if (!codigoEmpleado || (!fechaEntrada && !fechaSalida)) {
             res.status(400).json({
@@ -238,7 +240,9 @@ const updateTorno = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        const { codigoEmpleado, fechaEntrada, fechaSalida } = req.body;
+        const codigoEmpleado = req.body.codigoEmpleado ?? req.body.codigo_empleado;
+        const fechaEntrada = req.body.fechaEntrada ?? req.body.fecha_entrada;
+        const fechaSalida = req.body.fechaSalida ?? req.body.fecha_salida;
 
         if (!codigoEmpleado && fechaEntrada === undefined && fechaSalida === undefined) {
             res.status(400).json({

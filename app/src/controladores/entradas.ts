@@ -1,9 +1,13 @@
 import { Request, Response } from 'express';
 import { comprobarJWT } from '../helpers/jwt';
+import { Entrada } from '../models/entrada';
 
 // Importar pool de conexión (CommonJS)
 const pool = require('../database/conexion');
-const Entrada = require('../models/entrada');
+
+interface PgError extends Error {
+    code?: string;
+}
 
 // Tipos locales para respuestas API
 interface ApiResponse<T = any> {
@@ -263,24 +267,20 @@ const setEntrada = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        await pool.query(
-            'INSERT INTO entradas_vehiculos (nombre_conductor, empresa, matricula, clase_carga, fecha_entrada, firma, usuario) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+        const insertResult = await pool.query(
+            'INSERT INTO entradas_vehiculos (nombre_conductor, empresa, matricula, clase_carga, fecha_entrada, firma, usuario) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, nombre_conductor, empresa, matricula, clase_carga, fecha_entrada, firma',
             [nombre_conductor, empresa, matricula, clase_carga, fecha_entrada, firma, usuarioId]
         );
 
-        const entrada = await pool.query(
-            'SELECT id, nombre_conductor, empresa, matricula, clase_carga, fecha_entrada, firma FROM entradas_vehiculos WHERE firma = $1 and fecha_entrada = $2 ORDER BY fecha_entrada ASC',
-            [firma, fecha_entrada]
-        );
-
+        const created = insertResult.rows[0];
         const entrada1 = new Entrada(
-            entrada.rows[0].id,
-            entrada.rows[0].nombre_conductor,
-            entrada.rows[0].empresa,
-            entrada.rows[0].matricula,
-            entrada.rows[0].clase_carga,
-            entrada.rows[0].fecha_entrada,
-            entrada.rows[0].firma
+            created.id,
+            created.nombre_conductor,
+            created.empresa,
+            created.matricula,
+            created.clase_carga,
+            created.fecha_entrada,
+            created.firma
         );
 
         res.status(200).json({
@@ -289,7 +289,17 @@ const setEntrada = async (req: Request, res: Response): Promise<void> => {
         } as ApiResponse);
 
     } catch (error) {
-        console.log((error as Error).stack);
+        const pgError = error as PgError;
+        console.log(pgError.stack);
+
+        if (pgError.code === '23505') {
+            res.status(409).json({
+                ok: false,
+                mensaje: 'Entrada duplicada: ya existe un registro con la misma firma y fecha_entrada.'
+            } as ApiResponse);
+            return;
+        }
+
         res.status(500).json({
             ok: false,
             mensaje: 'Error al crear la entrada'

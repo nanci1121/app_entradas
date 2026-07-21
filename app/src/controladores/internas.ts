@@ -144,7 +144,10 @@ const setInterna = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        const { codigoEmpleado, nombrePersona, fechaSalida, motivo } = req.body;
+        const codigoEmpleado = req.body.codigoEmpleado ?? req.body.codigo_empleado;
+        const nombrePersona = req.body.nombrePersona ?? req.body.nombre_persona;
+        const fechaSalida = req.body.fechaSalida ?? req.body.fecha_salida;
+        const motivo = req.body.motivo;
         const fechaEntrada = null;
 
         if (!codigoEmpleado || !nombrePersona || !fechaSalida) {
@@ -297,15 +300,13 @@ const deleteInterna = async (req: Request, res: Response): Promise<void> => {
  */
 const consultaInterna = async (req: Request, res: Response): Promise<void> => {
     try {
-        let {
-            codigo_empleado,
-            nombre_persona,
-            fecha_entrada,
-            fecha_entrada2,
-            motivo,
-            limit = 100,
-            offset = 0
-        } = req.body;
+        let codigo_empleado = req.body.codigo_empleado ?? req.body.codigoEmpleado;
+        let nombre_persona = req.body.nombre_persona ?? req.body.nombrePersona;
+        let fecha_entrada = req.body.fecha_entrada ?? req.body.fechaEntrada ?? req.body.fechaSalida;
+        let fecha_entrada2 = req.body.fecha_entrada2 ?? req.body.fechaEntrada2 ?? req.body.fechaSalida2;
+        let motivo = req.body.motivo;
+        let limit = req.body.limit ?? 100;
+        let offset = req.body.offset ?? 0;
 
         if (!fecha_entrada || fecha_entrada.toString().trim() === '') {
             res.status(400).json({
@@ -392,7 +393,11 @@ const updateInternas = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        let { codigo_empleado, nombre_persona, fecha_entrada, fecha_salida, motivo } = req.body;
+        let codigo_empleado = req.body.codigo_empleado ?? req.body.codigoEmpleado;
+        let nombre_persona = req.body.nombre_persona ?? req.body.nombrePersona;
+        let fecha_entrada = req.body.fecha_entrada ?? req.body.fechaEntrada;
+        let fecha_salida = req.body.fecha_salida ?? req.body.fechaSalida;
+        let motivo = req.body.motivo;
 
         fecha_entrada = fecha_entrada || null;
         fecha_salida = fecha_salida || null;

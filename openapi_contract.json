@@ -1060,17 +1060,33 @@
                 ],
                 "properties": {
                   "codigo_empleado": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Código del empleado (acepta codigo_empleado o codigoEmpleado)"
+                  },
+                  "codigoEmpleado": {
+                    "type": "string",
+                    "description": "Código del empleado (alias camelCase)"
                   },
                   "nombre_persona": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Nombre de la persona (acepta nombre_persona o nombrePersona)"
+                  },
+                  "nombrePersona": {
+                    "type": "string",
+                    "description": "Nombre de la persona (alias camelCase)"
                   },
                   "motivo": {
                     "type": "string"
                   },
                   "fechaSalida": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "Fecha de salida (acepta fechaSalida o fecha_salida)"
+                  },
+                  "fecha_salida": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha de salida (alias snake_case)"
                   }
                 }
               }

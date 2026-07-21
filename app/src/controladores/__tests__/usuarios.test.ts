@@ -114,42 +114,46 @@ describe('Controlador: Usuarios', () => {
     });
 
     describe('createUsuario', () => {
-        it('debería retornar 400 si el email ya existe', async () => {
-            mockReq.body = {
-                name: 'New User',
-                email: 'exists@test.com',
-                password: 'pass123',
-            };
-
-            pool.query.mockResolvedValueOnce({ rowCount: 1 }); // Email ya existe
-
-            expect(pool.query).toBeDefined();
-        });
-
-        it('debería crear nuevo usuario con email válido', async () => {
-            mockReq.body = {
-                name: 'New User',
-                email: 'newemail@test.com',
-                password: 'pass123',
-            };
-
-            // Primera query: verificar email no existe
-            pool.query.mockResolvedValueOnce({ rowCount: 0 });
-            
-            // Segunda query: crear usuario
-            pool.query.mockResolvedValueOnce({
-                rowCount: 1,
-                rows: [{
-                    id: 10,
+        it('debería crear nuevo usuario aceptando codigoEmpleado (camelCase)', async () => {
+            const req = {
+                body: {
                     name: 'New User',
                     email: 'newemail@test.com',
-                    password: bcrypt.hashSync('pass123', 10),
-                    online: false,
-                    type: 'user',
-                }]
-            });
+                    password: 'pass123',
+                    codigoEmpleado: 'EMP100',
+                }
+            } as any;
+            const res = mockRes;
 
-            expect(pool.query).toBeDefined();
+            pool.query
+                .mockResolvedValueOnce({ rowCount: 0 }) // email no existe
+                .mockResolvedValueOnce({})              // insert query
+                .mockResolvedValueOnce({ rows: [{ id: 10, online: false }] }); // select id
+
+            await usuariosController.createUsuario(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(200);
+        });
+
+        it('debería crear nuevo usuario aceptando codigo_empleado (snake_case)', async () => {
+            const req = {
+                body: {
+                    name: 'New User 2',
+                    email: 'newemail2@test.com',
+                    password: 'pass123',
+                    codigo_empleado: 'EMP200',
+                }
+            } as any;
+            const res = mockRes;
+
+            pool.query
+                .mockResolvedValueOnce({ rowCount: 0 })
+                .mockResolvedValueOnce({})
+                .mockResolvedValueOnce({ rows: [{ id: 11, online: false }] });
+
+            await usuariosController.createUsuario(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(200);
         });
 
         it('debería hashear la contraseña antes de guardar', () => {
