@@ -9,9 +9,8 @@ jest.mock('../../helpers/jwt', () => ({
   comprobarJWT: jest.fn(() => [true, 1]),
 }));
 
-jest.mock('../../models/entrada', () => {
-  // Mock como constructor compatible con `new Entrada(...)`
-  return jest.fn().mockImplementation((
+jest.mock('../../models/entrada', () => ({
+  Entrada: jest.fn().mockImplementation((
     id,
     nombreConductor,
     empresa,
@@ -34,9 +33,9 @@ jest.mock('../../models/entrada', () => {
     fechaSalida,
     recepcio,
     vigilancia,
-    usuario,
-  }));
-});
+    usuario
+  }))
+}));
 
 const pool = require('../../database/conexion');
 const { comprobarJWT } = require('../../helpers/jwt');
@@ -59,6 +58,7 @@ const mockRequest = (overrides: Partial<Request> = {}) => {
 describe('Controlador Entradas', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    if (pool.query.mockReset) pool.query.mockReset();
   });
 
   it('getEntradas devuelve ok true con lista', async () => {

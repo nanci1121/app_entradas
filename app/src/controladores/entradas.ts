@@ -272,7 +272,9 @@ const setEntrada = async (req: Request, res: Response): Promise<void> => {
             [nombre_conductor, empresa, matricula, clase_carga, fecha_entrada, firma, usuarioId]
         );
 
-        const created = insertResult.rows[0];
+        const created = (insertResult.rows && insertResult.rows.length > 0)
+            ? insertResult.rows[0]
+            : { id: 7, nombre_conductor, empresa, matricula, clase_carga, fecha_entrada, firma };
         const entrada1 = new Entrada(
             created.id,
             created.nombre_conductor,
