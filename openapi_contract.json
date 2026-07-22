@@ -300,6 +300,9 @@
                 "required": [
                   "empresa",
                   "matricula",
+                  "nombre_conductor",
+                  "clase_carga",
+                  "firma",
                   "fecha_entrada"
                 ],
                 "properties": {
@@ -673,23 +676,41 @@
                 "type": "object",
                 "required": [
                   "nombre_persona",
-                  "empresa_exterior"
+                  "empresa_exterior",
+                  "peticionario",
+                  "telefono_persona",
+                  "firma",
+                  "fecha_entrada"
                 ],
                 "properties": {
                   "nombre_persona": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Nombre de la persona exterior"
                   },
                   "empresa_exterior": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Nombre de la empresa exterior"
                   },
                   "peticionario": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Persona o departamento que solicita la visita"
                   },
                   "telefono_persona": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Teléfono de contacto de la persona"
+                  },
+                  "firma": {
+                    "type": "string",
+                    "description": "Firma digital en texto plano o base64"
+                  },
+                  "fecha_entrada": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha y hora de entrada en formato ISO8601"
                   },
                   "nota": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Observaciones o nota adicional"
                   }
                 }
               }
@@ -698,7 +719,45 @@
         },
         "responses": {
           "201": {
-            "description": "Externa creada"
+            "description": "Externa creada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "externa": {
+                      "type": "integer",
+                      "description": "ID de la externa creada",
+                      "example": 6114
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos incompletos o nulos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "entrada": {
+                      "type": "string",
+                      "example": "datos persona exterior enviados nulos"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -762,7 +821,7 @@
                     "description": "ID de la externa a actualizar",
                     "example": 123
                   },
-                  "fechaSalida": {
+                  "fecha_salida": {
                     "type": "string",
                     "format": "date-time",
                     "description": "Fecha y hora de salida (formato: YYYY-MM-DD HH:mm:ss)",
@@ -961,7 +1020,24 @@
         ],
         "responses": {
           "200": {
-            "description": "Externa eliminada"
+            "description": "Externa eliminada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "mensaje": {
+                      "type": "string",
+                      "example": "Persona externa 6114 eliminada satisfactoriamente"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -984,15 +1060,15 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "fechaEntrada",
-                  "fechaEntrada2"
+                  "fecha_entrada",
+                  "fecha_entrada2"
                 ],
                 "properties": {
-                  "fechaEntrada": {
+                  "fecha_entrada": {
                     "type": "string",
                     "format": "date-time"
                   },
-                  "fechaEntrada2": {
+                  "fecha_entrada2": {
                     "type": "string",
                     "format": "date-time"
                   }
@@ -1056,37 +1132,25 @@
                 "required": [
                   "codigo_empleado",
                   "nombre_persona",
-                  "fechaSalida"
+                  "fecha_salida"
                 ],
                 "properties": {
                   "codigo_empleado": {
                     "type": "string",
-                    "description": "Código del empleado (acepta codigo_empleado o codigoEmpleado)"
-                  },
-                  "codigoEmpleado": {
-                    "type": "string",
-                    "description": "Código del empleado (alias camelCase)"
+                    "description": "Código del empleado"
                   },
                   "nombre_persona": {
                     "type": "string",
-                    "description": "Nombre de la persona (acepta nombre_persona o nombrePersona)"
-                  },
-                  "nombrePersona": {
-                    "type": "string",
-                    "description": "Nombre de la persona (alias camelCase)"
-                  },
-                  "motivo": {
-                    "type": "string"
-                  },
-                  "fechaSalida": {
-                    "type": "string",
-                    "format": "date-time",
-                    "description": "Fecha de salida (acepta fechaSalida o fecha_salida)"
+                    "description": "Nombre de la persona"
                   },
                   "fecha_salida": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "Fecha de salida (alias snake_case)"
+                    "description": "Fecha y hora de salida"
+                  },
+                  "motivo": {
+                    "type": "string",
+                    "description": "Motivo opcional de la salida"
                   }
                 }
               }
@@ -1172,11 +1236,11 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "fechaEntrada": {
+                  "fecha_entrada": {
                     "type": "string",
                     "format": "date-time"
                   },
-                  "fechaSalida": {
+                  "fecha_salida": {
                     "type": "string",
                     "format": "date-time"
                   }
@@ -1246,7 +1310,7 @@
                   "id": {
                     "type": "integer"
                   },
-                  "fechaEntrada": {
+                  "fecha_entrada": {
                     "type": "string",
                     "format": "date-time"
                   }
@@ -1308,15 +1372,15 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "fechaSalida",
-                  "fechaSalida2"
+                  "fecha_salida",
+                  "fecha_salida2"
                 ],
                 "properties": {
-                  "fechaSalida": {
+                  "fecha_salida": {
                     "type": "string",
                     "format": "date-time"
                   },
-                  "fechaSalida2": {
+                  "fecha_salida2": {
                     "type": "string",
                     "format": "date-time"
                   }
@@ -1354,15 +1418,18 @@
                 ],
                 "properties": {
                   "codigo_empleado": {
-                    "type": "string"
-                  },
-                  "fechaEntrada": {
                     "type": "string",
-                    "format": "date-time"
+                    "description": "Código del empleado"
                   },
-                  "fechaSalida": {
+                  "fecha_entrada": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "Fecha y hora de entrada por torno"
+                  },
+                  "fecha_salida": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha y hora de salida por torno"
                   }
                 }
               }
@@ -1474,11 +1541,11 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "fechaEntrada": {
+                  "fecha_entrada": {
                     "type": "string",
                     "format": "date-time"
                   },
-                  "fechaSalida": {
+                  "fecha_salida": {
                     "type": "string",
                     "format": "date-time"
                   }
@@ -1545,17 +1612,21 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "fechaInicio",
-                  "fechaFin"
+                  "fecha_inicio",
+                  "fecha_fin"
                 ],
                 "properties": {
-                  "fechaInicio": {
+                  "fecha_inicio": {
                     "type": "string",
                     "format": "date-time"
                   },
-                  "fechaFin": {
+                  "fecha_fin": {
                     "type": "string",
                     "format": "date-time"
+                  },
+                  "codigo_empleado": {
+                    "type": "string",
+                    "description": "Filtro opcional por código de empleado"
                   }
                 }
               }

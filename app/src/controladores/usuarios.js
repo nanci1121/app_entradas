@@ -155,7 +155,10 @@ const updateUsuario = async (req, res = response) => {
                 id
             ]);
             // console.log('preparado para gravar');
-            res.json('Usuario Updated Successfully');
+            res.json({
+                ok: true,
+                mensaje: 'Usuario actualizado correctamente'
+            });
         }
     } catch (error) {
         console.log(error.stack)
@@ -173,7 +176,10 @@ const deleteUsuario = async (req, res = response) => {
             })
         } else {
             const response = await pool.query('DELETE FROM users where id = $1', [id]);
-            res.json(`Usuario ${id} eliminado satisfactoriamente`);
+            res.json({
+                ok: true,
+                mensaje: `Usuario ${id} eliminado satisfactoriamente`
+            });
         }
     } catch (error) {
         console.log(error.stack)

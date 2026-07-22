@@ -304,7 +304,10 @@ const deleteTorno = async (req, res = response) => {
  */
 const consultaTorno = async (req, res = response) => {
     try {
-        let { codigoEmpleado, fechaInicio, fechaFin, limit = 100, offset = 0 } = req.body;
+        const codigoEmpleado = req.body.codigo_empleado || req.body.codigoEmpleado;
+        const fechaInicio = req.body.fecha_inicio || req.body.fechaInicio;
+        const fechaFin = req.body.fecha_fin || req.body.fechaFin;
+        let { limit = 100, offset = 0 } = req.body;
         const params = [];
 
         let query = `

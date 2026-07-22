@@ -1,5 +1,39 @@
 # Changelog del Contrato OpenAPI
 
+## Fecha: 2026-07-22
+
+### Cambios Realizados
+
+#### 1. Endpoint `POST /api/externas/new_externa` Actualizado para Flutter
+
+**Problema Identificado:**
+- El esquema del contrato marcaba únicamente `nombre_persona` y `empresa_exterior` como obligatorios, y no incluía `firma` ni `fecha_entrada`.
+- El backend en NodeJS rechazaba las peticiones enviadas desde Flutter si faltaba cualquiera de los 6 campos requeridos por `setExterna`.
+
+**Campos Obligatorios Actualizados (`required`):**
+- `nombre_persona` (string)
+- `empresa_exterior` (string)
+- `peticionario` (string)
+- `telefono_persona` (string)
+- `firma` (string)
+- `fecha_entrada` (string, ISO8601)
+
+**Campos Opcionales:**
+- `nota` (string)
+
+#### 2. Normalización Completa a `snake_case` en Todo el Contrato
+
+- **Estandarización:** Se han unificado todas las claves JSON del contrato al estándar `snake_case`.
+- **Propiedades actualizadas:**
+  - `fecha_salida` (en lugar de `fechaSalida`)
+  - `fecha_entrada` / `fecha_entrada2` (en lugar de `fechaEntrada` / `fechaEntrada2`)
+  - `codigo_empleado` (en lugar de `codigoEmpleado`)
+  - `nombre_persona` (en lugar de `nombrePersona`)
+  - `fecha_inicio` / `fecha_fin` (en lugar de `fechaInicio` / `fechaFin`)
+- **Respuestas JSON:** Todas las respuestas de error y éxito de la API devuelven objetos JSON estructurados `{ "ok": true/false, ... }`.
+
+---
+
 ## Fecha: 2026-01-23
 
 ### Cambios Realizados

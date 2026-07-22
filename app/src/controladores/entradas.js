@@ -402,7 +402,10 @@ const updateEntradas = async (req, res = response) => {
             })
         } else {
             const response = await pool.query('UPDATE entradas_vehiculos SET nombre_conductor = $1, empresa = $2, matricula = $3, clase_carga = $4, fecha_entrada = $5, fecha_salida = $6 , usuario = $7 WHERE id = $8', [nombre_conductor, empresa, matricula, clase_carga, fecha_entrada, fecha_salida, id_usuaio, id]);
-            res.json(`Entrada ${id} modificada satisfactoriamente`);
+            res.json({
+                ok: true,
+                mensaje: `Entrada ${id} modificada satisfactoriamente`
+            });
         }
 
     } catch (error) {

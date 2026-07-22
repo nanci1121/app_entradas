@@ -160,13 +160,17 @@ const updatePorteriaInterna = async (req, res = response) => {
         const token = req.headers['x-token'];
         const usuario_id = comprobarJWT(token);
         const id_usuaio = usuario_id[1];
-        const { id, fechaEntrada } = req.body;
+        const id = req.body.id;
+        const fechaEntrada = req.body.fecha_entrada || req.body.fechaEntrada;
 
         const existe_id = await pool.query('SELECT * FROM salidas_empleados WHERE id = $1 ORDER BY fecha_entrada ASC', [id]);
 
         if (existe_id.rowCount == 1) {
             const response = await pool.query('UPDATE salidas_empleados SET fecha_salida = $1, usuario = $2 WHERE id = $3', [fechaEntrada, id_usuaio, id]);
-            res.json('Entrada empleado Updated Successfully');
+            res.json({
+                ok: true,
+                mensaje: 'Entrada empleado actualizada correctamente'
+            });
         }
     } catch (error) {
         console.log(error.stack)
@@ -194,7 +198,10 @@ const deleteInterna = async (req, res = response) => {
             })
         } else {
             const response = await pool.query('DELETE FROM salidas_empleados where id = $1', [id]);
-            res.json(`Salida empleado ${id} eliminada satisfactoriamente`);
+            res.json({
+                ok: true,
+                mensaje: `Salida empleado ${id} eliminada satisfactoriamente`
+            });
         }
     } catch (error) {
         console.log(error.stack)

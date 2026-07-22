@@ -154,8 +154,9 @@ const updatePorteriaExterna = async (req, res = response) => {
     try {
         const token = req.headers['x-token'];
         const usuario_id = comprobarJWT(token);
-        const id_usuaio = usuario_id[1];
-        const { id, fechaSalida, recepcion } = req.body;
+        const id_usuario = usuario_id[1];
+        const { id, recepcion } = req.body;
+        const fechaSalida = req.body.fecha_salida || req.body.fechaSalida;
 
         // Validar que vengan los campos necesarios
         if (!id) {
@@ -184,7 +185,7 @@ const updatePorteriaExterna = async (req, res = response) => {
 
         // Actualizar la externa
         const updateQuery = 'UPDATE empresas_exteriores SET recepcion = $1, fecha_salida = $2, usuario = $3 WHERE id = $4';
-        const result = await pool.query(updateQuery, [recepcion, fechaSalida, id_usuaio, id]);
+        const result = await pool.query(updateQuery, [recepcion, fechaSalida, id_usuario, id]);
 
         // Verificar que la actualización se realizó
         if (result.rowCount === 0) {
@@ -238,8 +239,11 @@ const deleteExterna = async (req, res = response) => {
                 mensaje: `Persona externa con id  ${id} no se encuentra`
             })
         } else {
-            const response = await pool.query('DELETE FROM empresas_exteriores where id = $1', [id]);
-            res.json(`Persona externa ${id} eliminado satisfactoriamente`);
+            await pool.query('DELETE FROM empresas_exteriores where id = $1', [id]);
+            res.json({
+                ok: true,
+                mensaje: `Persona externa ${id} eliminada satisfactoriamente`
+            });
         }
     } catch (error) {
         console.log(error.stack)

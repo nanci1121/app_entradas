@@ -21,6 +21,8 @@ describe('Controlador: Usuarios', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        pool = require('../../database/conexion');
+        if (pool.query.mockReset) pool.query.mockReset();
         
         // Mock de Response
         mockRes = {

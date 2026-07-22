@@ -195,7 +195,8 @@ const updatePorteriaExterna = async (req: Request, res: Response): Promise<void>
     try {
         const token = req.headers['x-token'] as string | undefined;
         const [valid, usuarioId] = comprobarJWT(token || '');
-        const { id, fechaSalida, recepcion } = req.body;
+        const { id, recepcion } = req.body;
+        const fechaSalida = req.body.fecha_salida || req.body.fechaSalida;
 
         // Validar que vengan los campos necesarios
         if (!id) {

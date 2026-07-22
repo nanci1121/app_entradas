@@ -34,6 +34,10 @@ const router = Router();
  *             required:
  *               - nombre_persona
  *               - empresa_exterior
+ *               - peticionario
+ *               - telefono_persona
+ *               - firma
+ *               - fecha_entrada
  *             properties:
  *               nombre_persona:
  *                 type: string
@@ -43,11 +47,18 @@ const router = Router();
  *                 type: string
  *               telefono_persona:
  *                 type: string
+ *               firma:
+ *                 type: string
+ *               fecha_entrada:
+ *                 type: string
+ *                 format: date-time
  *               nota:
  *                 type: string
  *     responses:
  *       201:
  *         description: Externa creada
+ *       400:
+ *         description: Datos persona exterior incompletos o nulos
  */
 router.post('/new_externa', validarJWT, setExterna);
 
