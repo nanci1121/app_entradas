@@ -231,5 +231,10 @@ router.put(
     [validarJWT, validateDateMiddleware(['fechaEntrada', 'fechaSalida'])],
     updateInternas
 );
+router.put(
+    '/interna/:id',
+    [validarJWT, validateDateMiddleware(['fechaEntrada', 'fechaSalida'])],
+    updateInternas
+);
 
 export default router;

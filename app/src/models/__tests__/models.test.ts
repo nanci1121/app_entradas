@@ -132,6 +132,44 @@ describe('Model: Externa', () => {
         expect(externa.fechaSalida).toBeUndefined();
         expect(externa.recepcion).toBe(false);
     });
+
+    it('debería mapear correctamente desde snake_case con fecha_salida', () => {
+        const body = {
+            id: 6501,
+            nombre_persona: 'Mariame Diabate',
+            empresa_exterior: 'jaf',
+            peticionario: 'Porteria',
+            telefono_persona: '666111222',
+            firma: 'base64sig',
+            recepcion: true,
+            fecha_entrada: '2026-10-06 04:23:00',
+            fecha_salida: '2026-10-06 08:40:00',
+            nota: 'nota test'
+        };
+
+        const externa = Externa.fromRequest(body);
+
+        expect(externa.id).toBe(6501);
+        expect(externa.nombrePersona).toBe('Mariame Diabate');
+        expect(externa.empresaExterior).toBe('jaf');
+        expect(externa.fechaEntrada).toBe('2026-10-06 04:23:00');
+        expect(externa.fechaSalida).toBe('2026-10-06 08:40:00');
+        expect(externa.recepcion).toBe(true);
+    });
+
+    it('debería mapear correctamente desde camelCase con fechaSalida', () => {
+        const body = {
+            id: 6501,
+            nombrePersona: 'Mariame Diabate',
+            empresaExterior: 'jaf',
+            fechaEntrada: '2026-10-06 04:23:00',
+            fechaSalida: '2026-10-06 08:40:00'
+        };
+
+        const externa = Externa.fromRequest(body);
+
+        expect(externa.fechaSalida).toBe('2026-10-06 08:40:00');
+    });
 });
 
 describe('Model: Interna', () => {

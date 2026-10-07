@@ -12,10 +12,13 @@ router.post('/new_externa', validarJWT, setExterna);
 router.get('/externas_hoy', validarJWT, getExternasHoy);
 router.get('/porteria', validarJWT, getExternaPorteria);
 router.get('/:id', validarJWT, getExterna);
+router.get('/externa/:id', validarJWT, getExterna);
 router.put('/porteria', validarJWT, updatePorteriaExterna);
 router.delete('/externa/:id', validarJWT, deleteExterna);
+router.delete('/:id', validarJWT, deleteExterna);
 router.put('/buscar_externa', [validarJWT, validateDateMiddleware(['fechaEntrada', 'fechaEntrada2'])], buscarExterna);
 router.put('/:id', validarJWT, updateExternas);
+router.put('/externa/:id', validarJWT, updateExternas);
 router.get('/by-nombreConductor/:nombreConductor', validarJWT, getExternaByNombreConductor);
 
 

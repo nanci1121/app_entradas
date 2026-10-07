@@ -109,6 +109,7 @@ router.get('/porteria', validarJWT, getExternaPorteria);
  *         description: Externa encontrada
  */
 router.get('/:id', validarJWT, getExterna);
+router.get('/externa/:id', validarJWT, getExterna);
 
 /**
  * @swagger
@@ -154,6 +155,7 @@ router.put('/porteria', validarJWT, updatePorteriaExterna);
  *         description: Externa eliminada
  */
 router.delete('/externa/:id', validarJWT, deleteExterna);
+router.delete('/:id', validarJWT, deleteExterna);
 
 /**
  * @swagger
@@ -219,6 +221,7 @@ router.put(
  *         description: Externa actualizada
  */
 router.put('/:id', validarJWT, updateExternas);
+router.put('/externa/:id', validarJWT, updateExternas);
 
 /**
  * @swagger

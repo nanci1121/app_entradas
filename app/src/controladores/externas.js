@@ -360,7 +360,18 @@ const updateExternas = async (req, res = response) => {
             });
         }
         
-        // Ahora usamos las propiedades del objeto 'externaToUpdate' (en camelCase).
+        const actual = existeid.rows[0] || {};
+
+        const nombrePersona = (externaToUpdate.nombrePersona !== undefined && externaToUpdate.nombrePersona !== '') ? externaToUpdate.nombrePersona : (actual.nombre_persona || '');
+        const empresaExterior = (externaToUpdate.empresaExterior !== undefined && externaToUpdate.empresaExterior !== '') ? externaToUpdate.empresaExterior : (actual.empresa_exterior || '');
+        const peticionario = (req.body.peticionario !== undefined) ? req.body.peticionario : (actual.peticionario || '');
+        const telefonoPersona = (req.body.telefono_persona !== undefined || req.body.telefonoPersona !== undefined) ? (req.body.telefono_persona || req.body.telefonoPersona) : (actual.telefono_persona || '');
+        const fechaEntrada = (req.body.fecha_entrada !== undefined || req.body.fechaEntrada !== undefined) ? (req.body.fecha_entrada || req.body.fechaEntrada) : (actual.fecha_entrada || externaToUpdate.fechaEntrada);
+        const nota = (req.body.nota !== undefined) ? req.body.nota : (actual.nota || '');
+        const fechaSalida = (req.body.fecha_salida !== undefined || req.body.fechaSalida !== undefined || req.body.fecha_entrada2 !== undefined) ? externaToUpdate.fechaSalida : actual.fecha_salida;
+        const recepcion = (req.body.recepcion !== undefined) ? externaToUpdate.recepcion : actual.recepcion;
+
+        // Ahora usamos las propiedades procesadas
         const query = `
             UPDATE empresas_exteriores 
             SET nombre_persona = $1, empresa_exterior = $2, peticionario = $3, 
@@ -370,15 +381,15 @@ const updateExternas = async (req, res = response) => {
         `;
         
         const params = [
-            externaToUpdate.nombrePersona,
-            externaToUpdate.empresaExterior,
-            externaToUpdate.peticionario,
-            externaToUpdate.telefonoPersona,
-            externaToUpdate.fechaEntrada,
-            externaToUpdate.nota,
-            externaToUpdate.fechaSalida,
+            nombrePersona,
+            empresaExterior,
+            peticionario,
+            telefonoPersona,
+            fechaEntrada,
+            nota,
+            fechaSalida,
             id_usuaio,
-            externaToUpdate.recepcion,
+            recepcion,
             id
         ];
 

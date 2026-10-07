@@ -72,6 +72,38 @@ describe('Router /api/externas', () => {
     expect(call.params).toEqual({ id: '9' });
   });
 
+  it('GET /externa/:id pasa el id al controlador', async () => {
+    const app = buildApp();
+    const res = await request(app).get('/api/externas/externa/9').set('x-token', 'token');
+
+    expect(res.status).toBe(200);
+    expect(res.body.id).toBe('9');
+    const call = getExterna.mock.calls[0]?.[0];
+    expect(call.params).toEqual({ id: '9' });
+  });
+
+  it('PUT /:id llama updateExternas', async () => {
+    const { updateExternas } = require('../../controladores/externas');
+    updateExternas.mockImplementationOnce((req: any, res: any) => res.status(200).json({ ok: true, id: req.params.id }));
+    const app = buildApp();
+    const res = await request(app).put('/api/externas/6501').set('x-token', 'token').send({ nombre_persona: 'Mariame' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.id).toBe('6501');
+    expect(updateExternas).toHaveBeenCalledTimes(1);
+  });
+
+  it('PUT /externa/:id llama updateExternas', async () => {
+    const { updateExternas } = require('../../controladores/externas');
+    updateExternas.mockImplementationOnce((req: any, res: any) => res.status(200).json({ ok: true, id: req.params.id }));
+    const app = buildApp();
+    const res = await request(app).put('/api/externas/externa/6501').set('x-token', 'token').send({ nombre_persona: 'Mariame' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.id).toBe('6501');
+    expect(updateExternas).toHaveBeenCalledTimes(1);
+  });
+
   it('PUT /buscar_externa aplica validateDateMiddleware', async () => {
     const app = buildApp();
     const payload = { fechaEntrada: '2025-01-05', fechaEntrada2: '2025-01-06' };

@@ -49,9 +49,9 @@ export class Externa {
             body.peticionario || '',
             body.telefono_persona || body.telefonoPersona || '',
             body.firma || '',
-            body.recepcion || false,
+            body.recepcion !== undefined ? body.recepcion : false,
             body.fecha_entrada || body.fechaEntrada,
-            body.fecha_entrada2 || body.fechaSalida,
+            body.fecha_salida || body.fechaSalida || body.fecha_entrada2,
             body.nota || '',
             body.usuario || 0
         );

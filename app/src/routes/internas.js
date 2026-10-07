@@ -20,12 +20,15 @@ const {
 router.post('/new_Interna', [validarJWT, validateDateMiddleware(['fechaSalida'])], setInterna);
 router.get('/internas_hoy', validarJWT, getInternasHoy);
 router.get('/:id', validarJWT, getInterna);
+router.get('/interna/:id', validarJWT, getInterna);
 router.post('/code', validarJWT, getInternaCode);
 
 router.put('/porteria', [validarJWT, validateDateMiddleware(['fechaEntrada'])], updatePorteriaInterna);
 router.delete('/interna/:id', validarJWT, deleteInterna);
+router.delete('/:id', validarJWT, deleteInterna);
 router.put('/buscar_interna', [validarJWT, validateDateMiddleware(['fechaSalida', 'fechaSalida2'])], consultaInterna);
 router.put('/:id', [validarJWT, validateDateMiddleware(['fechaEntrada', 'fechaSalida'])], updateInternas);
+router.put('/interna/:id', [validarJWT, validateDateMiddleware(['fechaEntrada', 'fechaSalida'])], updateInternas);
 
 
 module.exports = router;
